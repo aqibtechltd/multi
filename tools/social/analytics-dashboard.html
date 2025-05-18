@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Analytics Dashboard - Track Performance | Multi Tools</title>
+    <meta name="description" content="Track and analyze your social media performance across multiple platforms. Get insights on engagement, growth, and audience demographics.">
+    <meta name="keywords" content="social media analytics, social media metrics, engagement tracking, audience analytics, performance dashboard">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .metric-card {
+            transition: all 0.3s ease;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+        .metric-label {
+            color: var(--bs-gray-600);
+            font-size: 0.875rem;
+        }
+        .trend-indicator {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+        }
+        .trend-up {
+            background-color: var(--bs-success-bg-subtle);
+            color: var(--bs-success);
+        }
+        .trend-down {
+            background-color: var(--bs-danger-bg-subtle);
+            color: var(--bs-danger);
+        }
+        .platform-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+        .demographic-bar {
+            height: 25px;
+            border-radius: 1rem;
+            margin-bottom: 0.5rem;
+            background-color: var(--bs-primary-bg-subtle);
+            overflow: hidden;
+        }
+        .demographic-fill {
+            height: 100%;
+            background-color: var(--bs-primary);
+            transition: width 0.3s ease;
+        }
+        .top-post {
+            padding: 1rem;
+            border-radius: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        .top-post:hover {
+            background-color: var(--bs-light);
+            transform: translateX(5px);
+        }
+        .date-range-selector {
+            border-radius: 2rem;
+            padding: 0.5rem 1rem;
+            background-color: var(--bs-light);
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">Social Media Analytics Dashboard</h1>
+        
+        <!-- Platform Selection and Date Range -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="btn-group" role="group" aria-label="Platform selection">
+                    <button type="button" class="btn btn-outline-primary active">
+                        <i class="bi bi-instagram"></i> Instagram
+                    </button>
+                    <button type="button" class="btn btn-outline-primary">
+                        <i class="bi bi-facebook"></i> Facebook
+                    </button>
+                    <button type="button" class="btn btn-outline-primary">
+                        <i class="bi bi-twitter-x"></i> Twitter
+                    </button>
+                    <button type="button" class="btn btn-outline-primary">
+                        <i class="bi bi-linkedin"></i> LinkedIn
+                    </button>
+                </div>
+            </div>
+            <div class="col-md-6 text-end">
+                <div class="date-range-selector">
+                    <i class="bi bi-calendar3"></i>
+                    <select class="border-0 bg-transparent">
+                        <option>Last 7 days</option>
+                        <option>Last 30 days</option>
+                        <option>Last 90 days</option>
+                        <option>Custom range</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="metric-card bg-white p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="metric-label">Total Followers</div>
+                        <span class="trend-indicator trend-up">
+                            <i class="bi bi-arrow-up"></i> 2.5%
+                        </span>
+                    </div>
+                    <div class="metric-value">12,458</div>
+                    <div class="small text-muted">+310 this week</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card bg-white p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="metric-label">Engagement Rate</div>
+                        <span class="trend-indicator trend-up">
+                            <i class="bi bi-arrow-up"></i> 1.8%
+                        </span>
+                    </div>
+                    <div class="metric-value">4.2%</div>
+                    <div class="small text-muted">Industry avg: 3.1%</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card bg-white p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="metric-label">Post Reach</div>
+                        <span class="trend-indicator trend-down">
+                            <i class="bi bi-arrow-down"></i> 0.5%
+                        </span>
+                    </div>
+                    <div class="metric-value">45.3K</div>
+                    <div class="small text-muted">-120 vs last week</div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="metric-card bg-white p-3">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="metric-label">Profile Visits</div>
+                        <span class="trend-indicator trend-up">
+                            <i class="bi bi-arrow-up"></i> 5.2%
+                        </span>
+                    </div>
+                    <div class="metric-value">8,924</div>
+                    <div class="small text-muted">+462 this week</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div class="row mb-4">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Engagement Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="engagementChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Audience Growth</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Demographics and Top Posts -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Audience Demographics</h5>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="mb-3">Age Distribution</h6>
+                        <div class="demographic-bar">
+                            <div class="demographic-fill" style="width: 35%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <small>18-24</small>
+                            <small>35%</small>
+                        </div>
+
+                        <div class="demographic-bar">
+                            <div class="demographic-fill" style="width: 45%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <small>25-34</small>
+                            <small>45%</small>
+                        </div>
+
+                        <div class="demographic-bar">
+                            <div class="demographic-fill" style="width: 15%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-3">
+                            <small>35-44</small>
+                            <small>15%</small>
+                        </div>
+
+                        <div class="demographic-bar">
+                            <div class="demographic-fill" style="width: 5%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <small>45+</small>
+                            <small>5%</small>
+                        </div>
+
+                        <hr>
+
+                        <h6 class="mb-3">Gender Distribution</h6>
+                        <div class="chart-container" style="height: 200px;">
+                            <canvas id="genderChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Top Performing Posts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="top-post">
+                            <div class="d-flex align-items-center mb-2">
+                                <img src="https://via.placeholder.com/50" class="rounded me-3" alt="Post thumbnail">
+                                <div>
+                                    <h6 class="mb-1">Summer Collection Launch</h6>
+                                    <small class="text-muted">Posted 2 days ago</small>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><i class="bi bi-heart-fill text-danger"></i> 1.2K likes</span>
+                                <span><i class="bi bi-chat-fill text-primary"></i> 234 comments</span>
+                                <span><i class="bi bi-share-fill text-success"></i> 89 shares</span>
+                            </div>
+                        </div>
+
+                        <div class="top-post">
+                            <div class="d-flex align-items-center mb-2">
+                                <img src="https://via.placeholder.com/50" class="rounded me-3" alt="Post thumbnail">
+                                <div>
+                                    <h6 class="mb-1">Behind the Scenes</h6>
+                                    <small class="text-muted">Posted 4 days ago</small>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><i class="bi bi-heart-fill text-danger"></i> 956 likes</span>
+                                <span><i class="bi bi-chat-fill text-primary"></i> 178 comments</span>
+                                <span><i class="bi bi-share-fill text-success"></i> 67 shares</span>
+                            </div>
+                        </div>
+
+                        <div class="top-post">
+                            <div class="d-flex align-items-center mb-2">
+                                <img src="https://via.placeholder.com/50" class="rounded me-3" alt="Post thumbnail">
+                                <div>
+                                    <h6 class="mb-1">Customer Success Story</h6>
+                                    <small class="text-muted">Posted 5 days ago</small>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span><i class="bi bi-heart-fill text-danger"></i> 845 likes</span>
+                                <span><i class="bi bi-chat-fill text-primary"></i> 156 comments</span>
+                                <span><i class="bi bi-share-fill text-success"></i> 45 shares</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../js/analytics-dashboard.js"></script>
+</body>
+</html> 

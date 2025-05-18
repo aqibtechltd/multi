@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Metadata Viewer - Multi-Tools</title>
+    <meta name="description" content="View and extract image metadata including EXIF data. Get detailed information about your images.">
+    <meta name="keywords" content="image metadata, EXIF viewer, image information, photo metadata">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .image-container {
+            max-height: 400px;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #previewImage {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 0.25rem;
+        }
+        .placeholder-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.25rem;
+            padding: 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .placeholder-upload:hover {
+            border-color: #0d6efd;
+            background-color: #f1f8ff;
+        }
+        .placeholder-upload i {
+            font-size: 2rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        .metadata-section {
+            margin-bottom: 1.5rem;
+        }
+        .metadata-table {
+            font-size: 0.9rem;
+        }
+        .metadata-table th {
+            width: 40%;
+            font-weight: 600;
+        }
+        .metadata-table td {
+            word-break: break-word;
+        }
+        .metadata-nav {
+            border-bottom: 2px solid #dee2e6;
+            margin-bottom: 1rem;
+        }
+        .metadata-nav .nav-link {
+            border: none;
+            padding: 0.5rem 1rem;
+            margin-right: 1rem;
+            color: #6c757d;
+            position: relative;
+        }
+        .metadata-nav .nav-link.active {
+            color: #0d6efd;
+            font-weight: 500;
+        }
+        .metadata-nav .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #0d6efd;
+        }
+        .map-container {
+            height: 300px;
+            border-radius: 0.25rem;
+            overflow: hidden;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Metadata Viewer</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4" id="uploadArea">
+                            <input type="file" id="imageInput" accept="image/*" class="d-none">
+                            <div class="placeholder-upload" onclick="document.getElementById('imageInput').click()">
+                                <i class="bi bi-image"></i>
+                                <h6>Upload Image</h6>
+                                <p class="text-muted small mb-0">Click to upload or drag & drop</p>
+                                <p class="text-muted small">Supports JPG, PNG, WebP, TIFF (Max 10MB)</p>
+                            </div>
+                        </div>
+
+                        <!-- Editor Area -->
+                        <div class="d-none" id="editorArea">
+                            <!-- Image Preview -->
+                            <div class="image-container">
+                                <img id="previewImage" src="" alt="Preview">
+                            </div>
+
+                            <!-- Metadata Navigation -->
+                            <ul class="nav metadata-nav" role="tablist">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-bs-toggle="tab" href="#basicInfo">
+                                        <i class="bi bi-info-circle"></i> Basic Info
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#exifData">
+                                        <i class="bi bi-camera"></i> EXIF Data
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#gpsData">
+                                        <i class="bi bi-geo-alt"></i> GPS Data
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-bs-toggle="tab" href="#otherData">
+                                        <i class="bi bi-three-dots"></i> Other Data
+                                    </a>
+                                </li>
+                            </ul>
+
+                            <!-- Metadata Content -->
+                            <div class="tab-content">
+                                <!-- Basic Info -->
+                                <div class="tab-pane fade show active" id="basicInfo">
+                                    <div class="metadata-section">
+                                        <table class="table table-sm metadata-table">
+                                            <tbody>
+                                                <tr><th>File Name</th><td id="fileName">-</td></tr>
+                                                <tr><th>File Size</th><td id="fileSize">-</td></tr>
+                                                <tr><th>File Type</th><td id="fileType">-</td></tr>
+                                                <tr><th>Dimensions</th><td id="dimensions">-</td></tr>
+                                                <tr><th>Last Modified</th><td id="lastModified">-</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- EXIF Data -->
+                                <div class="tab-pane fade" id="exifData">
+                                    <div class="metadata-section">
+                                        <table class="table table-sm metadata-table">
+                                            <tbody>
+                                                <tr><th>Camera Make</th><td id="cameraMake">-</td></tr>
+                                                <tr><th>Camera Model</th><td id="cameraModel">-</td></tr>
+                                                <tr><th>Date Taken</th><td id="dateTaken">-</td></tr>
+                                                <tr><th>Exposure Time</th><td id="exposureTime">-</td></tr>
+                                                <tr><th>F Number</th><td id="fNumber">-</td></tr>
+                                                <tr><th>ISO Speed</th><td id="isoSpeed">-</td></tr>
+                                                <tr><th>Focal Length</th><td id="focalLength">-</td></tr>
+                                                <tr><th>Flash</th><td id="flash">-</td></tr>
+                                                <tr><th>White Balance</th><td id="whiteBalance">-</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- GPS Data -->
+                                <div class="tab-pane fade" id="gpsData">
+                                    <div class="metadata-section">
+                                        <table class="table table-sm metadata-table">
+                                            <tbody>
+                                                <tr><th>Latitude</th><td id="latitude">-</td></tr>
+                                                <tr><th>Longitude</th><td id="longitude">-</td></tr>
+                                                <tr><th>Altitude</th><td id="altitude">-</td></tr>
+                                                <tr><th>GPS Date/Time</th><td id="gpsDateTime">-</td></tr>
+                                            </tbody>
+                                        </table>
+                                        <div id="mapContainer" class="map-container d-none"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Other Data -->
+                                <div class="tab-pane fade" id="otherData">
+                                    <div class="metadata-section">
+                                        <table class="table table-sm metadata-table">
+                                            <tbody>
+                                                <tr><th>Software</th><td id="software">-</td></tr>
+                                                <tr><th>Copyright</th><td id="copyright">-</td></tr>
+                                                <tr><th>Artist</th><td id="artist">-</td></tr>
+                                                <tr><th>Color Space</th><td id="colorSpace">-</td></tr>
+                                                <tr><th>Compression</th><td id="compression">-</td></tr>
+                                                <tr><th>Resolution</th><td id="resolution">-</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="text-center mt-4">
+                                <button class="btn btn-outline-primary" onclick="downloadMetadata()">
+                                    <i class="bi bi-download"></i> Download Metadata
+                                </button>
+                                <button class="btn btn-outline-danger" onclick="removeMetadata()">
+                                    <i class="bi bi-eraser"></i> Remove Metadata
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Using Metadata</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> EXIF data is only available in JPG and TIFF files</li>
+                            <li><i class="bi bi-check-circle text-success"></i> GPS data may be hidden for privacy reasons</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Download metadata for backup purposes</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Remove metadata to protect privacy</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Variables
+        let originalImage = null;
+        let exifData = null;
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp', 'image/tiff'];
+
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const editorArea = document.getElementById('editorArea');
+        const previewImage = document.getElementById('previewImage');
+        const mapContainer = document.getElementById('mapContainer');
+
+        // Setup event listeners
+        imageInput.addEventListener('change', handleImageUpload);
+
+        // Drag and drop
+        const placeholder = document.querySelector('.placeholder-upload');
+        placeholder.addEventListener('dragover', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#0d6efd';
+            placeholder.style.backgroundColor = '#f1f8ff';
+        });
+
+        placeholder.addEventListener('dragleave', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#dee2e6';
+            placeholder.style.backgroundColor = '#f8f9fa';
+        });
+
+        placeholder.addEventListener('drop', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#dee2e6';
+            placeholder.style.backgroundColor = '#f8f9fa';
+            
+            const file = e.dataTransfer.files[0];
+            handleImageUpload({ target: { files: [file] } });
+        });
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            if (file.size > maxFileSize) {
+                alert('File is too large. Maximum size is 10MB.');
+                return;
+            }
+
+            if (!supportedFormats.includes(file.type)) {
+                alert('Unsupported file format. Please use JPG, PNG, WebP, or TIFF.');
+                return;
+            }
+
+            // Read basic file info
+            updateBasicInfo(file);
+
+            // Read EXIF data
+            EXIF.getData(file, function() {
+                exifData = EXIF.getAllTags(this);
+                updateExifInfo(exifData);
+                updateGpsInfo(exifData);
+                updateOtherInfo(exifData);
+            });
+
+            // Preview image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                originalImage = e.target.result;
+                previewImage.src = originalImage;
+                uploadArea.classList.add('d-none');
+                editorArea.classList.remove('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateBasicInfo(file) {
+            document.getElementById('fileName').textContent = file.name;
+            document.getElementById('fileSize').textContent = formatFileSize(file.size);
+            document.getElementById('fileType').textContent = file.type;
+            document.getElementById('lastModified').textContent = new Date(file.lastModified).toLocaleString();
+
+            const img = new Image();
+            img.onload = function() {
+                document.getElementById('dimensions').textContent = `${img.width} × ${img.height} pixels`;
+            };
+            img.src = URL.createObjectURL(file);
+        }
+
+        function updateExifInfo(exif) {
+            if (!exif) return;
+
+            document.getElementById('cameraMake').textContent = exif.Make || '-';
+            document.getElementById('cameraModel').textContent = exif.Model || '-';
+            document.getElementById('dateTaken').textContent = exif.DateTime || '-';
+            document.getElementById('exposureTime').textContent = exif.ExposureTime ? 
+                `1/${Math.round(1/exif.ExposureTime)} sec` : '-';
+            document.getElementById('fNumber').textContent = exif.FNumber ? 
+                `f/${exif.FNumber}` : '-';
+            document.getElementById('isoSpeed').textContent = exif.ISOSpeedRatings || '-';
+            document.getElementById('focalLength').textContent = exif.FocalLength ? 
+                `${exif.FocalLength}mm` : '-';
+            document.getElementById('flash').textContent = exif.Flash ? 'Yes' : 'No';
+            document.getElementById('whiteBalance').textContent = exif.WhiteBalance ? 
+                'Manual' : 'Auto';
+        }
+
+        function updateGpsInfo(exif) {
+            if (!exif || !exif.GPSLatitude) {
+                mapContainer.classList.add('d-none');
+                return;
+            }
+
+            const lat = convertDMSToDD(exif.GPSLatitude, exif.GPSLatitudeRef);
+            const lng = convertDMSToDD(exif.GPSLongitude, exif.GPSLongitudeRef);
+
+            document.getElementById('latitude').textContent = lat.toFixed(6);
+            document.getElementById('longitude').textContent = lng.toFixed(6);
+            document.getElementById('altitude').textContent = exif.GPSAltitude ? 
+                `${Math.round(exif.GPSAltitude)}m` : '-';
+            document.getElementById('gpsDateTime').textContent = exif.GPSDateStamp || '-';
+
+            // Show map if coordinates are available
+            if (lat && lng) {
+                mapContainer.classList.remove('d-none');
+                // Here you would initialize a map with the coordinates
+                // Using Google Maps, Leaflet, or another mapping service
+            }
+        }
+
+        function updateOtherInfo(exif) {
+            if (!exif) return;
+
+            document.getElementById('software').textContent = exif.Software || '-';
+            document.getElementById('copyright').textContent = exif.Copyright || '-';
+            document.getElementById('artist').textContent = exif.Artist || '-';
+            document.getElementById('colorSpace').textContent = exif.ColorSpace || '-';
+            document.getElementById('compression').textContent = exif.Compression || '-';
+            document.getElementById('resolution').textContent = exif.XResolution ? 
+                `${exif.XResolution} × ${exif.YResolution} dpi` : '-';
+        }
+
+        function convertDMSToDD(dms, ref) {
+            if (!dms) return null;
+
+            let dd = dms[0] + dms[1]/60 + dms[2]/3600;
+            if (ref === 'S' || ref === 'W') dd = -dd;
+            return dd;
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function downloadMetadata() {
+            if (!exifData) return;
+
+            const metadata = {
+                basic: {
+                    fileName: document.getElementById('fileName').textContent,
+                    fileSize: document.getElementById('fileSize').textContent,
+                    fileType: document.getElementById('fileType').textContent,
+                    dimensions: document.getElementById('dimensions').textContent,
+                    lastModified: document.getElementById('lastModified').textContent
+                },
+                exif: exifData
+            };
+
+            const blob = new Blob([JSON.stringify(metadata, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'metadata.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function removeMetadata() {
+            if (!originalImage) return;
+
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                const link = document.createElement('a');
+                link.download = 'image-without-metadata.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            };
+            img.src = originalImage;
+        }
+    </script>
+</body>
+</html> 

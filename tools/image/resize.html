@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Resizer - Multi-Tools</title>
+    <meta name="description" content="Resize images online. Change dimensions while maintaining aspect ratio. Supports JPG, PNG, WebP, and more.">
+    <meta name="keywords" content="image resizer, photo resizer, resize pictures, change image size">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .drop-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            cursor: pointer;
+        }
+        .drop-zone:hover {
+            border-color: #6c757d;
+        }
+        .drop-zone.dragover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        .preview-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .preview-item {
+            position: relative;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        .preview-item img {
+            max-width: 100%;
+            height: auto;
+            max-height: 300px;
+            object-fit: contain;
+        }
+        .remove-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            z-index: 1;
+        }
+        .dimensions-display {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Resizer</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4">
+                            <div class="drop-zone" id="dropZone">
+                                <i class="bi bi-arrows-angle-expand display-4"></i>
+                                <p class="mb-2">Drag and drop images here or click to upload</p>
+                                <p class="text-muted small mb-0">Supports JPG, PNG, WebP (Max 10MB per file)</p>
+                                <input type="file" id="fileInput" multiple accept="image/*" class="d-none">
+                            </div>
+                        </div>
+
+                        <!-- Resize Options -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">Resize Settings</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Resize Method</label>
+                                    <select class="form-select" id="resizeMethod">
+                                        <option value="dimensions">Custom Dimensions</option>
+                                        <option value="percentage">Percentage</option>
+                                        <option value="preset">Preset Sizes</option>
+                                    </select>
+                                </div>
+
+                                <!-- Custom Dimensions -->
+                                <div class="col-md-6" id="dimensionsGroup">
+                                    <label class="form-label">Maintain Aspect Ratio</label>
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" id="maintainAspectRatio" checked>
+                                        <label class="form-check-label" for="maintainAspectRatio">Keep proportions</label>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 dimensions-input">
+                                    <label class="form-label">Width (pixels)</label>
+                                    <input type="number" class="form-control" id="width" placeholder="Enter width">
+                                </div>
+
+                                <div class="col-md-6 dimensions-input">
+                                    <label class="form-label">Height (pixels)</label>
+                                    <input type="number" class="form-control" id="height" placeholder="Enter height">
+                                </div>
+
+                                <!-- Percentage Scaling -->
+                                <div class="col-md-6 percentage-input d-none">
+                                    <label class="form-label">Scale Percentage</label>
+                                    <div class="input-group">
+                                        <input type="number" class="form-control" id="percentage" value="100">
+                                        <span class="input-group-text">%</span>
+                                    </div>
+                                </div>
+
+                                <!-- Preset Sizes -->
+                                <div class="col-md-6 preset-input d-none">
+                                    <label class="form-label">Preset Size</label>
+                                    <select class="form-select" id="preset">
+                                        <option value="thumbnail">Thumbnail (150x150)</option>
+                                        <option value="small">Small (300x300)</option>
+                                        <option value="medium">Medium (800x600)</option>
+                                        <option value="large">Large (1920x1080)</option>
+                                        <option value="social">Social Media (1200x630)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Area -->
+                        <div class="mb-4 d-none" id="previewArea">
+                            <h5 class="mb-3">Selected Images</h5>
+                            <div class="preview-container" id="previewContainer"></div>
+                        </div>
+
+                        <!-- Resize Button -->
+                        <div class="text-center">
+                            <button class="btn btn-primary" onclick="resizeImages()" id="resizeButton" disabled>
+                                <i class="bi bi-arrows-angle-expand"></i> Resize Images
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Results</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Maintain aspect ratio to prevent distortion</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Use percentage scaling for proportional resizing</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Choose preset sizes for common use cases</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Preview changes before downloading</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // File handling variables
+        let selectedFiles = [];
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+
+        // DOM Elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const previewArea = document.getElementById('previewArea');
+        const previewContainer = document.getElementById('previewContainer');
+        const resizeButton = document.getElementById('resizeButton');
+        const resizeMethod = document.getElementById('resizeMethod');
+        const maintainAspectRatio = document.getElementById('maintainAspectRatio');
+        const widthInput = document.getElementById('width');
+        const heightInput = document.getElementById('height');
+
+        // Setup event listeners
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        dropZone.addEventListener('drop', handleDrop, false);
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFiles);
+        resizeMethod.addEventListener('change', updateResizeInputs);
+        maintainAspectRatio.addEventListener('change', handleAspectRatioChange);
+
+        // Handle aspect ratio maintenance
+        let originalAspectRatio = 1;
+        widthInput.addEventListener('input', () => {
+            if (maintainAspectRatio.checked && widthInput.value) {
+                heightInput.value = Math.round(widthInput.value / originalAspectRatio);
+            }
+        });
+
+        heightInput.addEventListener('input', () => {
+            if (maintainAspectRatio.checked && heightInput.value) {
+                widthInput.value = Math.round(heightInput.value * originalAspectRatio);
+            }
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight(e) {
+            dropZone.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles({ target: { files } });
+        }
+
+        function handleFiles(e) {
+            const files = [...e.target.files];
+            const validFiles = files.filter(file => {
+                if (file.size > maxFileSize) {
+                    alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                    return false;
+                }
+                if (!supportedFormats.includes(file.type)) {
+                    alert(`File ${file.name} is not a supported image format.`);
+                    return false;
+                }
+                return true;
+            });
+
+            if (validFiles.length > 0) {
+                selectedFiles = selectedFiles.concat(validFiles);
+                updatePreview();
+                resizeButton.disabled = false;
+            }
+        }
+
+        function updatePreview() {
+            previewArea.classList.remove('d-none');
+            previewContainer.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        originalAspectRatio = this.width / this.height;
+                        if (!widthInput.value && !heightInput.value) {
+                            widthInput.value = this.width;
+                            heightInput.value = this.height;
+                        }
+                    };
+                    img.src = e.target.result;
+
+                    const preview = document.createElement('div');
+                    preview.className = 'preview-item';
+                    preview.innerHTML = `
+                        <button class="btn btn-sm btn-outline-danger remove-button" onclick="removeFile(${index})">
+                            <i class="bi bi-x"></i>
+                        </button>
+                        <div class="text-center">
+                            <img src="${e.target.result}" alt="${file.name}" class="mb-2">
+                            <div class="dimensions-display">
+                                Original size: ${img.width}x${img.height}
+                            </div>
+                            <h6 class="mt-2 mb-1">${file.name}</h6>
+                            <p class="text-muted small mb-0">${formatFileSize(file.size)}</p>
+                        </div>
+                    `;
+                    previewContainer.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updatePreview();
+            if (selectedFiles.length === 0) {
+                previewArea.classList.add('d-none');
+                resizeButton.disabled = true;
+            }
+        }
+
+        function updateResizeInputs() {
+            const method = resizeMethod.value;
+            document.querySelectorAll('.dimensions-input').forEach(el => 
+                el.classList.toggle('d-none', method !== 'dimensions'));
+            document.querySelectorAll('.percentage-input').forEach(el => 
+                el.classList.toggle('d-none', method !== 'percentage'));
+            document.querySelectorAll('.preset-input').forEach(el => 
+                el.classList.toggle('d-none', method !== 'preset'));
+            document.getElementById('dimensionsGroup').classList.toggle('d-none', method !== 'dimensions');
+        }
+
+        function handleAspectRatioChange() {
+            if (maintainAspectRatio.checked && widthInput.value) {
+                heightInput.value = Math.round(widthInput.value / originalAspectRatio);
+            }
+        }
+
+        async function resizeImages() {
+            const method = resizeMethod.value;
+            let targetWidth, targetHeight;
+
+            switch (method) {
+                case 'dimensions':
+                    targetWidth = parseInt(widthInput.value);
+                    targetHeight = parseInt(heightInput.value);
+                    break;
+                case 'percentage':
+                    const percentage = parseInt(document.getElementById('percentage').value) / 100;
+                    // Will be calculated per image
+                    break;
+                case 'preset':
+                    const preset = document.getElementById('preset').value;
+                    switch (preset) {
+                        case 'thumbnail': [targetWidth, targetHeight] = [150, 150]; break;
+                        case 'small': [targetWidth, targetHeight] = [300, 300]; break;
+                        case 'medium': [targetWidth, targetHeight] = [800, 600]; break;
+                        case 'large': [targetWidth, targetHeight] = [1920, 1080]; break;
+                        case 'social': [targetWidth, targetHeight] = [1200, 630]; break;
+                    }
+                    break;
+            }
+
+            resizeButton.disabled = true;
+
+            try {
+                for (const file of selectedFiles) {
+                    const img = await createImage(file);
+                    const canvas = document.createElement('canvas');
+                    let newWidth, newHeight;
+
+                    if (method === 'percentage') {
+                        const percentage = parseInt(document.getElementById('percentage').value) / 100;
+                        newWidth = img.width * percentage;
+                        newHeight = img.height * percentage;
+                    } else {
+                        if (maintainAspectRatio.checked) {
+                            const aspectRatio = img.width / img.height;
+                            if (targetWidth / targetHeight > aspectRatio) {
+                                newHeight = targetHeight;
+                                newWidth = targetHeight * aspectRatio;
+                            } else {
+                                newWidth = targetWidth;
+                                newHeight = targetWidth / aspectRatio;
+                            }
+                        } else {
+                            newWidth = targetWidth;
+                            newHeight = targetHeight;
+                        }
+                    }
+
+                    canvas.width = newWidth;
+                    canvas.height = newHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, newWidth, newHeight);
+
+                    // Download resized image
+                    const link = document.createElement('a');
+                    link.download = `resized_${file.name}`;
+                    link.href = canvas.toDataURL(file.type);
+                    link.click();
+                }
+            } catch (error) {
+                console.error('Error resizing images:', error);
+                alert('Error resizing images. Please try again.');
+            } finally {
+                resizeButton.disabled = false;
+            }
+        }
+
+        function createImage(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Initialize resize inputs
+        updateResizeInputs();
+    </script>
+</body>
+</html> 

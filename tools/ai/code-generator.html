@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Generator - Multi-Tools</title>
+    <meta name="description" content="Generate code snippets and complete programs using advanced AI. Support for multiple programming languages and frameworks.">
+    <meta name="keywords" content="AI code generator, code generation tool, programming assistant, code snippets">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .code-output {
+            background-color: #f8f9fa;
+            border-radius: 0.25rem;
+            position: relative;
+        }
+        .code-output pre {
+            margin-bottom: 0;
+            padding: 1rem;
+        }
+        .copy-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            z-index: 1;
+        }
+    </style>
+</head>
+<body class="line-numbers">
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">AI Code Generator</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- Programming Language -->
+                        <div class="mb-4">
+                            <label class="form-label">Programming Language</label>
+                            <select class="form-select" id="language">
+                                <option value="javascript">JavaScript</option>
+                                <option value="python">Python</option>
+                                <option value="java">Java</option>
+                                <option value="cpp">C++</option>
+                                <option value="csharp">C#</option>
+                                <option value="php">PHP</option>
+                                <option value="ruby">Ruby</option>
+                                <option value="swift">Swift</option>
+                                <option value="go">Go</option>
+                                <option value="rust">Rust</option>
+                            </select>
+                        </div>
+
+                        <!-- Framework Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">Framework (Optional)</label>
+                            <select class="form-select" id="framework">
+                                <option value="">None</option>
+                                <!-- Options will be updated based on language selection -->
+                            </select>
+                        </div>
+
+                        <!-- Code Description -->
+                        <div class="mb-4">
+                            <label class="form-label">Code Description</label>
+                            <textarea class="form-control" id="prompt" rows="3" placeholder="Describe what you want the code to do..."></textarea>
+                        </div>
+
+                        <!-- Additional Options -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="addComments">
+                                <label class="form-check-label" for="addComments">
+                                    Add Comments
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeTests">
+                                <label class="form-check-label" for="includeTests">
+                                    Include Tests
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="optimizeCode">
+                                <label class="form-check-label" for="optimizeCode">
+                                    Optimize Code
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Generate Button -->
+                        <div class="text-center mb-4">
+                            <button class="btn btn-primary" onclick="generateCode()">
+                                <i class="bi bi-code-square"></i> Generate Code
+                            </button>
+                        </div>
+
+                        <!-- Result Area -->
+                        <div class="mb-4 d-none" id="resultArea">
+                            <label class="form-label">Generated Code</label>
+                            <div class="code-output">
+                                <button class="btn btn-sm btn-outline-primary copy-button" onclick="copyCode()">
+                                    <i class="bi bi-clipboard"></i> Copy
+                                </button>
+                                <pre><code id="generatedCode" class="language-javascript"></code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Results</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Be specific about functionality and requirements</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Specify input/output formats if applicable</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Enable comments for better code understanding</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Include tests for critical functionality</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/plugins/line-numbers/prism-line-numbers.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-java.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-cpp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-csharp.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-ruby.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-swift.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-go.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-rust.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Framework options for each language
+        const frameworks = {
+            javascript: ['None', 'React', 'Vue.js', 'Angular', 'Node.js', 'Express'],
+            python: ['None', 'Django', 'Flask', 'FastAPI', 'Pandas', 'TensorFlow'],
+            java: ['None', 'Spring Boot', 'Hibernate', 'Android SDK'],
+            cpp: ['None', 'Qt', 'Boost', 'OpenCV'],
+            csharp: ['None', '.NET Core', 'ASP.NET', 'Unity'],
+            php: ['None', 'Laravel', 'Symfony', 'CodeIgniter'],
+            ruby: ['None', 'Ruby on Rails', 'Sinatra'],
+            swift: ['None', 'SwiftUI', 'UIKit'],
+            go: ['None', 'Gin', 'Echo', 'Fiber'],
+            rust: ['None', 'Rocket', 'Actix', 'Yew']
+        };
+
+        // Sample prompts for inspiration
+        const samplePrompts = [
+            "Create a function to sort an array of objects by a specific property",
+            "Build a REST API endpoint for user authentication",
+            "Generate a class for handling file operations",
+            "Write a recursive function to traverse a binary tree",
+            "Create a data structure for implementing a cache with LRU policy",
+            "Build a form validation utility function",
+            "Implement a simple state management system",
+            "Create a database connection pool manager"
+        ];
+
+        // Update framework options based on selected language
+        document.getElementById('language').addEventListener('change', function() {
+            const frameworkSelect = document.getElementById('framework');
+            const options = frameworks[this.value] || [];
+            
+            frameworkSelect.innerHTML = options.map(framework => 
+                `<option value="${framework.toLowerCase()}">${framework}</option>`
+            ).join('');
+        });
+
+        // Function to generate code
+        async function generateCode() {
+            const prompt = document.getElementById('prompt').value;
+            const language = document.getElementById('language').value;
+            const framework = document.getElementById('framework').value;
+            const addComments = document.getElementById('addComments').checked;
+            const includeTests = document.getElementById('includeTests').checked;
+            const optimizeCode = document.getElementById('optimizeCode').checked;
+
+            // Validate input
+            if (!prompt) {
+                alert('Please enter a code description');
+                return;
+            }
+
+            // Show loading state
+            const generateButton = document.querySelector('button.btn-primary');
+            const originalText = generateButton.innerHTML;
+            generateButton.innerHTML = '<i class="bi bi-hourglass"></i> Generating...';
+            generateButton.disabled = true;
+
+            try {
+                // In a real implementation, this would make an API call to an AI service
+                // For demo purposes, we'll simulate the API call with a timeout
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Show sample code (in real implementation, this would be the generated code)
+                const sampleCode = generateSampleCode(language, framework, addComments, includeTests);
+                
+                // Update code display
+                const codeElement = document.getElementById('generatedCode');
+                codeElement.className = `language-${language}`;
+                codeElement.textContent = sampleCode;
+                
+                // Show result area and highlight code
+                document.getElementById('resultArea').classList.remove('d-none');
+                Prism.highlightElement(codeElement);
+            } catch (error) {
+                alert('Error generating code. Please try again.');
+            } finally {
+                // Restore button state
+                generateButton.innerHTML = originalText;
+                generateButton.disabled = false;
+            }
+        }
+
+        // Function to generate sample code
+        function generateSampleCode(language, framework, addComments, includeTests) {
+            // This is just a placeholder. In a real implementation,
+            // the code would be generated by an AI model
+            const comments = addComments ? '// This is a sample function\n// It demonstrates basic functionality\n\n' : '';
+            
+            let code = '';
+            switch (language) {
+                case 'javascript':
+                    code = `${comments}function processData(data) {\n    const result = [];\n    \n    // Process each item\n    for (const item of data) {\n        result.push(item * 2);\n    }\n    \n    return result;\n}`;
+                    break;
+                case 'python':
+                    code = `${comments}def process_data(data):\n    result = []\n    \n    # Process each item\n    for item in data:\n        result.append(item * 2)\n    \n    return result`;
+                    break;
+                default:
+                    code = `${comments}// Sample code for ${language}\n// Framework: ${framework}\n\n// Implementation coming soon...`;
+            }
+
+            if (includeTests) {
+                code += '\n\n// Test cases\nfunction testProcessData() {\n    assert(processData([1, 2, 3]) === [2, 4, 6]);\n}';
+            }
+
+            return code;
+        }
+
+        // Function to copy code
+        function copyCode() {
+            const code = document.getElementById('generatedCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const copyButton = document.querySelector('.copy-button');
+                const originalText = copyButton.innerHTML;
+                copyButton.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                setTimeout(() => {
+                    copyButton.innerHTML = originalText;
+                }, 2000);
+            });
+        }
+
+        // Set random placeholder text
+        window.addEventListener('load', function() {
+            const randomPrompt = samplePrompts[Math.floor(Math.random() * samplePrompts.length)];
+            document.getElementById('prompt').placeholder = `Example: ${randomPrompt}`;
+            
+            // Trigger initial framework options update
+            document.getElementById('language').dispatchEvent(new Event('change'));
+        });
+    </script>
+</body>
+</html> 

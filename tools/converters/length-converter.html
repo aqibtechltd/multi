@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Length Converter - Unit Conversion Tools | Multi Tools</title>
+    <meta name="description" content="Convert between different units of length including meters, feet, inches, kilometers, miles, and more. Fast and accurate length conversions.">
+    <meta name="keywords" content="length converter, unit converter, distance converter, metric converter, imperial converter">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .converter-card {
+            transition: all 0.3s ease;
+            border-radius: 1rem;
+        }
+        .converter-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .unit-select {
+            min-width: 120px;
+        }
+        .swap-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        .swap-button:hover {
+            transform: rotate(180deg);
+        }
+        .result-card {
+            background: linear-gradient(45deg, var(--bs-primary), var(--bs-info));
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+        .common-conversions {
+            background-color: var(--bs-light);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-top: 1rem;
+        }
+        .conversion-item {
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease;
+        }
+        .conversion-item:hover {
+            background-color: rgba(var(--bs-primary-rgb), 0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">Length Converter</h1>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Main Converter -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <!-- From Unit -->
+                            <div class="col-md-5">
+                                <label class="form-label">From</label>
+                                <div class="input-group mb-3">
+                                    <input type="number" class="form-control" id="fromValue" placeholder="Enter value">
+                                    <select class="form-select unit-select" id="fromUnit">
+                                        <option value="m">Meters (m)</option>
+                                        <option value="km">Kilometers (km)</option>
+                                        <option value="cm">Centimeters (cm)</option>
+                                        <option value="mm">Millimeters (mm)</option>
+                                        <option value="ft">Feet (ft)</option>
+                                        <option value="in">Inches (in)</option>
+                                        <option value="yd">Yards (yd)</option>
+                                        <option value="mi">Miles (mi)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Swap Button -->
+                            <div class="col-md-2 text-center mb-3">
+                                <button class="btn btn-outline-primary swap-button" id="swapBtn">
+                                    <i class="bi bi-arrow-left-right"></i>
+                                </button>
+                            </div>
+
+                            <!-- To Unit -->
+                            <div class="col-md-5">
+                                <label class="form-label">To</label>
+                                <div class="input-group mb-3">
+                                    <input type="number" class="form-control" id="toValue" readonly>
+                                    <select class="form-select unit-select" id="toUnit">
+                                        <option value="km">Kilometers (km)</option>
+                                        <option value="m">Meters (m)</option>
+                                        <option value="cm">Centimeters (cm)</option>
+                                        <option value="mm">Millimeters (mm)</option>
+                                        <option value="ft">Feet (ft)</option>
+                                        <option value="in">Inches (in)</option>
+                                        <option value="yd">Yards (yd)</option>
+                                        <option value="mi">Miles (mi)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Result Card -->
+                        <div class="result-card text-center">
+                            <h3 class="mb-2" id="resultText">0 meters = 0 kilometers</h3>
+                            <p class="mb-0" id="additionalInfo">Enter a value to convert</p>
+                        </div>
+
+                        <!-- Common Conversions -->
+                        <div class="common-conversions">
+                            <h6 class="mb-3">Common Conversions</h6>
+                            <div class="row" id="commonConversions">
+                                <!-- Common conversions will be added here via JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Formula Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Conversion Formula</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="formulaExplanation">
+                            <!-- Formula explanation will be added here via JavaScript -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Quick Reference -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Quick Reference</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <h6>Metric Units</h6>
+                            <ul class="list-unstyled">
+                                <li>1 kilometer = 1000 meters</li>
+                                <li>1 meter = 100 centimeters</li>
+                                <li>1 centimeter = 10 millimeters</li>
+                            </ul>
+                        </div>
+                        <div class="mb-4">
+                            <h6>Imperial Units</h6>
+                            <ul class="list-unstyled">
+                                <li>1 mile = 1760 yards</li>
+                                <li>1 yard = 3 feet</li>
+                                <li>1 foot = 12 inches</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h6>Metric to Imperial</h6>
+                            <ul class="list-unstyled">
+                                <li>1 meter ≈ 3.281 feet</li>
+                                <li>1 kilometer ≈ 0.621 miles</li>
+                                <li>1 inch = 2.54 centimeters</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Card -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Tips & Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                <h6><i class="bi bi-lightbulb text-warning"></i> Usage Tips</h6>
+                                <ul class="small">
+                                    <li>Use decimals for precise measurements</li>
+                                    <li>Click the swap button to reverse conversion</li>
+                                    <li>Results update automatically as you type</li>
+                                    <li>Common conversions are shown for reference</li>
+                                </ul>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-link text-success"></i> Related Tools</h6>
+                                <ul class="list-unstyled small">
+                                    <li>• <a href="area-converter.html">Area Converter</a></li>
+                                    <li>• <a href="volume-converter.html">Volume Converter</a></li>
+                                    <li>• <a href="weight-converter.html">Weight Converter</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../js/length-converter.js"></script>
+</body>
+</html> 

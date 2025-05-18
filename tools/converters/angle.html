@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Angle Converter - Multi-Tools</title>
+    <meta name="description" content="Convert between different angle units including degrees, radians, gradians, and more. Built by Aqib Chaudhary.">
+    <meta name="keywords" content="angle converter, degree converter, radian converter, gradian converter">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <div class="row">
+            <!-- Tool Content -->
+            <div class="col-lg-8">
+                <h1 class="mb-4">Angle Converter</h1>
+                <p class="lead mb-4">Convert between different units of angle measurement instantly.</p>
+
+                <!-- Tool Interface -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fromValue" class="form-label">From</label>
+                                <input type="number" class="form-control mb-2" id="fromValue" placeholder="Enter value">
+                                <select class="form-select" id="fromUnit">
+                                    <option value="deg">Degrees (°)</option>
+                                    <option value="rad">Radians (rad)</option>
+                                    <option value="grad">Gradians (grad)</option>
+                                    <option value="mrad">Milliradians (mrad)</option>
+                                    <option value="arcmin">Arc Minutes (')</option>
+                                    <option value="arcsec">Arc Seconds (")</option>
+                                    <option value="turn">Turns</option>
+                                    <option value="quad">Quadrants</option>
+                                    <option value="rev">Revolutions</option>
+                                    <option value="circle">Circle</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="toValue" class="form-label">To</label>
+                                <input type="number" class="form-control mb-2" id="toValue" readonly>
+                                <select class="form-select" id="toUnit">
+                                    <option value="rad">Radians (rad)</option>
+                                    <option value="deg">Degrees (°)</option>
+                                    <option value="grad">Gradians (grad)</option>
+                                    <option value="mrad">Milliradians (mrad)</option>
+                                    <option value="arcmin">Arc Minutes (')</option>
+                                    <option value="arcsec">Arc Seconds (")</option>
+                                    <option value="turn">Turns</option>
+                                    <option value="quad">Quadrants</option>
+                                    <option value="rev">Revolutions</option>
+                                    <option value="circle">Circle</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-primary" onclick="convert()">Convert</button>
+                            <button class="btn btn-secondary" onclick="swapUnits()">Swap Units</button>
+                            <button class="btn btn-danger" onclick="clearValues()">Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Common Conversions -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Common Conversions</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Formula</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Degrees</td>
+                                        <td>Radians</td>
+                                        <td>× π/180</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Radians</td>
+                                        <td>Degrees</td>
+                                        <td>× 180/π</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Degrees</td>
+                                        <td>Gradians</td>
+                                        <td>× 10/9</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Degrees</td>
+                                        <td>Arc Minutes</td>
+                                        <td>× 60</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Ad Space -->
+                <div class="ad-container mb-4">
+                    <div class="ad-placeholder bg-light p-3 text-center">
+                        Advertisement
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-info-circle text-info"></i> Full circle = 360 degrees = 2π radians</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Radians are used in calculus and physics</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Gradians: 100 grads = 90 degrees</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Arc minutes/seconds used in astronomy</li>
+                            <li><i class="bi bi-info-circle text-info"></i> 1 turn = 1 revolution = 360 degrees</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Results are rounded to 6 decimal places</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Related Tools -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Related Tools</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><a href="/tools/calculators/triangle-calculator.html">Triangle Calculator</a></li>
+                            <li class="list-group-item"><a href="/tools/calculators/circle-calculator.html">Circle Calculator</a></li>
+                            <li class="list-group-item"><a href="/tools/calculators/trigonometry-calculator.html">Trigonometry Calculator</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Conversion rates to Radians (base unit)
+        const conversionRates = {
+            rad: 1,
+            deg: Math.PI / 180,
+            grad: Math.PI / 200,
+            mrad: 0.001,
+            arcmin: Math.PI / (180 * 60),
+            arcsec: Math.PI / (180 * 3600),
+            turn: 2 * Math.PI,
+            quad: Math.PI / 2,
+            rev: 2 * Math.PI,
+            circle: 2 * Math.PI
+        };
+
+        function convert() {
+            const fromValue = parseFloat(document.getElementById('fromValue').value);
+            const fromUnit = document.getElementById('fromUnit').value;
+            const toUnit = document.getElementById('toUnit').value;
+
+            if (isNaN(fromValue)) {
+                document.getElementById('toValue').value = '';
+                return;
+            }
+
+            // Convert to Radians first (base unit)
+            const radians = fromValue * conversionRates[fromUnit];
+            
+            // Convert from Radians to target unit
+            const result = radians / conversionRates[toUnit];
+            
+            document.getElementById('toValue').value = result.toFixed(6);
+        }
+
+        function swapUnits() {
+            const fromUnit = document.getElementById('fromUnit');
+            const toUnit = document.getElementById('toUnit');
+            const fromValue = document.getElementById('fromValue');
+            const toValue = document.getElementById('toValue');
+
+            // Swap unit selections
+            const temp = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = temp;
+
+            // Swap values if both exist
+            if (fromValue.value && toValue.value) {
+                const tempVal = fromValue.value;
+                fromValue.value = toValue.value;
+                toValue.value = tempVal;
+            }
+        }
+
+        function clearValues() {
+            document.getElementById('fromValue').value = '';
+            document.getElementById('toValue').value = '';
+        }
+
+        // Auto-convert when input value changes or units change
+        document.getElementById('fromValue').addEventListener('input', convert);
+        document.getElementById('fromUnit').addEventListener('change', convert);
+        document.getElementById('toUnit').addEventListener('change', convert);
+    </script>
+</body>
+</html> 

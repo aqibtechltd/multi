@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Generator - Generate Creative Content | Multi Tools</title>
+    <meta name="description" content="Generate high-quality text content using AI. Create blog posts, articles, stories, product descriptions, and more with our advanced AI text generator.">
+    <meta name="keywords" content="AI text generator, content generator, writing assistant, AI writing tool, creative writing">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .template-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .template-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .history-item {
+            border-left: 3px solid var(--primary-color);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            background-color: var(--light-color);
+        }
+        .word-count {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+        }
+        #generatedText {
+            min-height: 200px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-content {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="mb-2">Generating Content</h5>
+            <p class="mb-0 text-muted" id="loadingStatus">Analyzing your requirements...</p>
+        </div>
+    </div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">AI Text Generator</h1>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <form id="generatorForm">
+                            <div class="mb-3">
+                                <label for="contentType" class="form-label">Content Type</label>
+                                <select class="form-select" id="contentType" required>
+                                    <option value="">Select content type</option>
+                                    <optgroup label="Business Content">
+                                        <option value="blog">Blog Post</option>
+                                        <option value="article">Article</option>
+                                        <option value="product">Product Description</option>
+                                        <option value="email">Email</option>
+                                        <option value="social">Social Media Post</option>
+                                        <option value="press">Press Release</option>
+                                        <option value="newsletter">Newsletter</option>
+                                    </optgroup>
+                                    <optgroup label="Creative Writing">
+                                        <option value="story">Story</option>
+                                        <option value="poem">Poem</option>
+                                        <option value="script">Script/Dialog</option>
+                                        <option value="description">Scene Description</option>
+                                    </optgroup>
+                                    <optgroup label="Academic Content">
+                                        <option value="essay">Essay</option>
+                                        <option value="research">Research Summary</option>
+                                        <option value="thesis">Thesis Statement</option>
+                                    </optgroup>
+                                    <optgroup label="Marketing Content">
+                                        <option value="ad">Advertisement</option>
+                                        <option value="slogan">Slogan/Tagline</option>
+                                        <option value="pitch">Sales Pitch</option>
+                                    </optgroup>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="topic" class="form-label">Topic or Keywords</label>
+                                <input type="text" class="form-control" id="topic" 
+                                       placeholder="Enter your topic or keywords" required>
+                                <div class="form-text">Separate multiple keywords with commas</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="tone" class="form-label">Tone</label>
+                                        <select class="form-select" id="tone">
+                                            <option value="professional">Professional</option>
+                                            <option value="casual">Casual</option>
+                                            <option value="formal">Formal</option>
+                                            <option value="friendly">Friendly</option>
+                                            <option value="humorous">Humorous</option>
+                                            <option value="persuasive">Persuasive</option>
+                                            <option value="informative">Informative</option>
+                                            <option value="inspirational">Inspirational</option>
+                                            <option value="authoritative">Authoritative</option>
+                                            <option value="empathetic">Empathetic</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="length" class="form-label">Content Length</label>
+                                        <select class="form-select" id="length">
+                                            <option value="snippet">Snippet (50-100 words)</option>
+                                            <option value="short">Short (100-200 words)</option>
+                                            <option value="medium" selected>Medium (300-500 words)</option>
+                                            <option value="long">Long (600-1000 words)</option>
+                                            <option value="extended">Extended (1000+ words)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <a class="btn btn-link p-0" data-bs-toggle="collapse" href="#advancedOptions">
+                                    <i class="bi bi-gear"></i> Advanced Options
+                                </a>
+                                <div class="collapse mt-3" id="advancedOptions">
+                                    <div class="card card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="language" class="form-label">Language</label>
+                                                    <select class="form-select" id="language">
+                                                        <option value="en">English</option>
+                                                        <option value="es">Spanish</option>
+                                                        <option value="fr">French</option>
+                                                        <option value="de">German</option>
+                                                        <option value="it">Italian</option>
+                                                        <option value="pt">Portuguese</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="creativity" class="form-label">Creativity Level</label>
+                                                    <input type="range" class="form-range" id="creativity" 
+                                                           min="0" max="100" value="50">
+                                                    <div class="d-flex justify-content-between">
+                                                        <small>Conservative</small>
+                                                        <small>Balanced</small>
+                                                        <small>Creative</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="includeSources">
+                                            <label class="form-check-label" for="includeSources">
+                                                Include sources and references
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="avoidPlagiarism" checked>
+                                            <label class="form-check-label" for="avoidPlagiarism">
+                                                Ensure originality (avoid plagiarism)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-magic"></i> Generate Content
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="result" class="mt-4" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">Generated Content</h5>
+                                <span class="word-count" id="wordCount">0 words | 0 characters</span>
+                            </div>
+                            <div class="border rounded p-3 bg-light">
+                                <div id="generatedText" class="mb-3"></div>
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-primary" onclick="regenerateContent()">
+                                        <i class="bi bi-arrow-clockwise"></i> Regenerate
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="copyToClipboard()">
+                                        <i class="bi bi-clipboard"></i> Copy
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="downloadText()">
+                                        <i class="bi bi-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Templates Section -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Templates</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-2" id="templatesContainer">
+                            <!-- Templates will be added dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- History Section -->
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Generation History</h5>
+                        <button class="btn btn-sm btn-outline-danger" onclick="clearHistory()">
+                            Clear
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div id="historyContainer">
+                            <!-- History items will be added dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tips Section -->
+        <div class="row mt-4">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tips for Better Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="bi bi-check-circle text-success"></i> Be specific with your topic and keywords</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Choose the appropriate tone for your audience</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Select the right content length for your needs</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="bi bi-check-circle text-success"></i> Use advanced options for better control</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Review and edit the generated content</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Save templates for frequent use cases</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Related Tools -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Related Tools</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="summarizer.html" class="text-decoration-none">
+                                    <i class="bi bi-file-text"></i> Text Summarizer
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="paraphraser.html" class="text-decoration-none">
+                                    <i class="bi bi-arrow-repeat"></i> Paraphrasing Tool
+                                </a>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <a href="../text/grammar-checker.html" class="text-decoration-none">
+                                    <i class="bi bi-check-square"></i> Grammar Checker
+                                </a>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <a href="code-generator.html" class="text-decoration-none">
+                                    <i class="bi bi-code-square"></i> Code Generator
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script>
+        // Templates data
+        const templates = [
+            { id: 'blog-tech', name: 'Tech Blog Post', type: 'blog', topic: 'Latest Technology Trends', tone: 'professional' },
+            { id: 'prod-desc', name: 'Product Description', type: 'product', topic: 'Product Features and Benefits', tone: 'persuasive' },
+            { id: 'social-promo', name: 'Social Promo', type: 'social', topic: 'Special Offer Announcement', tone: 'friendly' },
+            { id: 'story-creative', name: 'Creative Story', type: 'story', topic: 'Adventure Story Plot', tone: 'casual' }
+        ];
+
+        // Initialize templates
+        function initializeTemplates() {
+            const container = document.getElementById('templatesContainer');
+            templates.forEach(template => {
+                const div = document.createElement('div');
+                div.className = 'col-6';
+                div.innerHTML = `
+                    <div class="template-card card h-100" onclick="useTemplate('${template.id}')">
+                        <div class="card-body p-2 text-center">
+                            <small class="d-block text-muted">${template.name}</small>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Load generation history
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('textGenerationHistory') || '[]');
+            const container = document.getElementById('historyContainer');
+            container.innerHTML = '';
+            
+            history.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong>${item.type}</strong>
+                            <small class="text-muted d-block">${item.topic}</small>
+                        </div>
+                        <button class="btn btn-sm btn-link" onclick="useHistoryItem(${index})">
+                            Use
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+
+            if (history.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center mb-0">No generation history yet</p>';
+            }
+        }
+
+        // Use template
+        function useTemplate(templateId) {
+            const template = templates.find(t => t.id === templateId);
+            if (template) {
+                document.getElementById('contentType').value = template.type;
+                document.getElementById('topic').value = template.topic;
+                document.getElementById('tone').value = template.tone;
+            }
+        }
+
+        // Use history item
+        function useHistoryItem(index) {
+            const history = JSON.parse(localStorage.getItem('textGenerationHistory') || '[]');
+            const item = history[index];
+            if (item) {
+                document.getElementById('contentType').value = item.type;
+                document.getElementById('topic').value = item.topic;
+                document.getElementById('tone').value = item.tone;
+                document.getElementById('length').value = item.length;
+            }
+        }
+
+        // Clear history
+        function clearHistory() {
+            if (confirm('Are you sure you want to clear your generation history?')) {
+                localStorage.removeItem('textGenerationHistory');
+                loadHistory();
+            }
+        }
+
+        // Update word count
+        function updateWordCount(text) {
+            const words = text.trim().split(/\s+/).length;
+            const chars = text.length;
+            document.getElementById('wordCount').textContent = 
+                `${words} words | ${chars} characters`;
+        }
+
+        // Generate content
+        document.getElementById('generatorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                type: document.getElementById('contentType').value,
+                topic: document.getElementById('topic').value,
+                tone: document.getElementById('tone').value,
+                length: document.getElementById('length').value,
+                language: document.getElementById('language').value,
+                creativity: document.getElementById('creativity').value,
+                includeSources: document.getElementById('includeSources').checked,
+                avoidPlagiarism: document.getElementById('avoidPlagiarism').checked
+            };
+
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                // Simulate AI generation with different loading states
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                document.getElementById('loadingStatus').textContent = 'Generating content...';
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                document.getElementById('loadingStatus').textContent = 'Refining output...';
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Save to history
+                const history = JSON.parse(localStorage.getItem('textGenerationHistory') || '[]');
+                history.unshift(formData);
+                if (history.length > 10) history.pop();
+                localStorage.setItem('textGenerationHistory', JSON.stringify(history));
+                loadHistory();
+
+                // Show result
+                const sampleText = `Here's a sample ${formData.length} ${formData.type} about "${formData.topic}" in a ${formData.tone} tone.\n\n` +
+                                 `This is where the AI-generated content would appear. The content would be generated based on your specifications ` +
+                                 `and would be unique and engaging.`;
+                
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('generatedText').innerHTML = sampleText;
+                updateWordCount(sampleText);
+                
+                // Scroll to result
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                alert('Error generating content. Please try again.');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        });
+
+        // Regenerate content
+        function regenerateContent() {
+            document.getElementById('generatorForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Copy to clipboard
+        async function copyToClipboard() {
+            const text = document.getElementById('generatedText').innerText;
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('Content copied to clipboard!');
+            } catch (error) {
+                alert('Failed to copy content');
+            }
+        }
+
+        // Download text
+        function downloadText() {
+            const text = document.getElementById('generatedText').innerText;
+            const type = document.getElementById('contentType').value;
+            const topic = document.getElementById('topic').value;
+            const filename = `${type}-${topic.replace(/[^a-z0-9]/gi, '-').toLowerCase()}.txt`;
+            
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Show toast message
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3';
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            toast.addEventListener('hidden.bs.toast', () => toast.remove());
+        }
+
+        // Initialize
+        initializeTemplates();
+        loadHistory();
+    </script>
+</body>
+</html> 

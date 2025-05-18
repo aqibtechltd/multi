@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Paraphrasing Tool - Rewrite Text Intelligently | Multi Tools</title>
+    <meta name="description" content="Rewrite and rephrase text intelligently using AI. Transform your content while maintaining meaning with different styles and tones.">
+    <meta name="keywords" content="AI paraphraser, text rewriter, content rephraser, paraphrasing tool, rewrite tool">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .text-stats {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+        }
+        #inputText, #outputText {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-content {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .style-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .style-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .style-card.active {
+            border-color: var(--primary-color);
+            background-color: #f8f9ff;
+        }
+        .similarity-badge {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            font-size: 0.75rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="mb-2">Paraphrasing Text</h5>
+            <p class="mb-0 text-muted" id="loadingStatus">Analyzing content...</p>
+        </div>
+    </div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">AI Paraphrasing Tool</h1>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <form id="paraphraserForm">
+                            <div class="mb-3">
+                                <label for="inputText" class="form-label">Input Text</label>
+                                <textarea class="form-control" id="inputText" rows="8" 
+                                          placeholder="Paste your text here (minimum 50 characters)" required></textarea>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-muted" id="inputStats">0 characters | 0 words</small>
+                                    <button type="button" class="btn btn-link btn-sm p-0" onclick="clearInput()">
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Writing Styles -->
+                            <div class="mb-4">
+                                <label class="form-label">Writing Style</label>
+                                <div class="row g-2">
+                                    <div class="col-6 col-md-3">
+                                        <div class="style-card card h-100 active" data-style="standard" onclick="selectStyle(this)">
+                                            <div class="card-body p-2 text-center">
+                                                <i class="bi bi-pencil mb-2"></i>
+                                                <small class="d-block">Standard</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="style-card card h-100" data-style="fluent" onclick="selectStyle(this)">
+                                            <div class="card-body p-2 text-center">
+                                                <i class="bi bi-water mb-2"></i>
+                                                <small class="d-block">Fluent</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="style-card card h-100" data-style="formal" onclick="selectStyle(this)">
+                                            <div class="card-body p-2 text-center">
+                                                <i class="bi bi-briefcase mb-2"></i>
+                                                <small class="d-block">Formal</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-6 col-md-3">
+                                        <div class="style-card card h-100" data-style="simple" onclick="selectStyle(this)">
+                                            <div class="card-body p-2 text-center">
+                                                <i class="bi bi-lightbulb mb-2"></i>
+                                                <small class="d-block">Simple</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <a class="btn btn-link p-0" data-bs-toggle="collapse" href="#advancedOptions">
+                                    <i class="bi bi-gear"></i> Advanced Options
+                                </a>
+                                <div class="collapse mt-3" id="advancedOptions">
+                                    <div class="card card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="language" class="form-label">Language</label>
+                                                    <select class="form-select" id="language">
+                                                        <option value="en">English</option>
+                                                        <option value="es">Spanish</option>
+                                                        <option value="fr">French</option>
+                                                        <option value="de">German</option>
+                                                        <option value="it">Italian</option>
+                                                        <option value="pt">Portuguese</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="tone" class="form-label">Tone</label>
+                                                    <select class="form-select" id="tone">
+                                                        <option value="neutral">Neutral</option>
+                                                        <option value="professional">Professional</option>
+                                                        <option value="casual">Casual</option>
+                                                        <option value="confident">Confident</option>
+                                                        <option value="friendly">Friendly</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="creativity" class="form-label">Creativity Level</label>
+                                            <input type="range" class="form-range" id="creativity" 
+                                                   min="0" max="100" value="50">
+                                            <div class="d-flex justify-content-between">
+                                                <small>Conservative</small>
+                                                <small>Balanced</small>
+                                                <small>Creative</small>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="improveFlow" checked>
+                                            <label class="form-check-label" for="improveFlow">
+                                                Improve sentence flow and readability
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="keepKeywords" checked>
+                                            <label class="form-check-label" for="keepKeywords">
+                                                Preserve key terms and phrases
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-magic"></i> Paraphrase Text
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="result" class="mt-4" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">Paraphrased Text</h5>
+                                <span class="text-stats" id="outputStats">
+                                    Similarity: 0% | 0 words
+                                </span>
+                            </div>
+                            <div class="border rounded p-3 bg-light">
+                                <div id="outputText" class="mb-3"></div>
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-primary" onclick="regenerateText()">
+                                        <i class="bi bi-arrow-clockwise"></i> Regenerate
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="copyToClipboard()">
+                                        <i class="bi bi-clipboard"></i> Copy
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="downloadText()">
+                                        <i class="bi bi-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tips for Better Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="bi bi-check-circle text-success"></i> Use complete, well-formed sentences</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Choose appropriate writing style</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Adjust creativity level as needed</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="bi bi-check-circle text-success"></i> Select suitable tone for context</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Use advanced options for precision</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Review and edit the output</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Tools -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Related Tools</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="text-generator.html" class="text-decoration-none">
+                                    <i class="bi bi-pencil-square"></i> Text Generator
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="summarizer.html" class="text-decoration-none">
+                                    <i class="bi bi-file-text"></i> Text Summarizer
+                                </a>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <a href="../text/grammar-checker.html" class="text-decoration-none">
+                                    <i class="bi bi-check-square"></i> Grammar Checker
+                                </a>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <a href="translator.html" class="text-decoration-none">
+                                    <i class="bi bi-translate"></i> AI Translator
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script>
+        // Update input stats
+        function updateInputStats() {
+            const text = document.getElementById('inputText').value;
+            const chars = text.length;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0).length;
+            document.getElementById('inputStats').textContent = 
+                `${chars} characters | ${words} words`;
+        }
+
+        // Clear input
+        function clearInput() {
+            document.getElementById('inputText').value = '';
+            updateInputStats();
+            document.getElementById('result').style.display = 'none';
+        }
+
+        // Select writing style
+        function selectStyle(element) {
+            document.querySelectorAll('.style-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            element.classList.add('active');
+        }
+
+        // Generate paraphrased text
+        document.getElementById('paraphraserForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const text = document.getElementById('inputText').value;
+            if (text.length < 50) {
+                alert('Please enter at least 50 characters.');
+                return;
+            }
+
+            const formData = {
+                text: text,
+                style: document.querySelector('.style-card.active').dataset.style,
+                language: document.getElementById('language').value,
+                tone: document.getElementById('tone').value,
+                creativity: document.getElementById('creativity').value,
+                improveFlow: document.getElementById('improveFlow').checked,
+                keepKeywords: document.getElementById('keepKeywords').checked
+            };
+
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                // Simulate AI paraphrasing with different loading states
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                document.getElementById('loadingStatus').textContent = 'Analyzing text structure...';
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                document.getElementById('loadingStatus').textContent = 'Generating variations...';
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Sample output (replace with actual AI-generated text)
+                const originalWords = text.trim().split(/\s+/).length;
+                const paraphrasedText = `This is a sample paraphrased version of your text. The actual AI-generated content would maintain the same meaning while using different wording and structure.\n\n` +
+                                      `The paraphrased text would follow your selected style (${formData.style}) and tone (${formData.tone}).`;
+                const similarity = Math.round(Math.random() * 20 + 70); // Random similarity between 70-90%
+
+                // Show result
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('outputText').innerHTML = paraphrasedText;
+                document.getElementById('outputStats').textContent = 
+                    `Similarity: ${similarity}% | ${paraphrasedText.trim().split(/\s+/).length} words`;
+                
+                // Scroll to result
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                alert('Error paraphrasing text. Please try again.');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        });
+
+        // Regenerate text
+        function regenerateText() {
+            document.getElementById('paraphraserForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Copy to clipboard
+        async function copyToClipboard() {
+            const text = document.getElementById('outputText').innerText;
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('Text copied to clipboard!');
+            } catch (error) {
+                alert('Failed to copy text');
+            }
+        }
+
+        // Download text
+        function downloadText() {
+            const text = document.getElementById('outputText').innerText;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'paraphrased-text.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Show toast message
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3';
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            toast.addEventListener('hidden.bs.toast', () => toast.remove());
+        }
+
+        // Initialize
+        document.getElementById('inputText').addEventListener('input', updateInputStats);
+    </script>
+</body>
+</html> 

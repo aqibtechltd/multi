@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speed Converter - Multi-Tools</title>
+    <meta name="description" content="Convert between different speed units including kilometers per hour, miles per hour, meters per second, and more. Built by Aqib Chaudhary.">
+    <meta name="keywords" content="speed converter, velocity converter, kmh converter, mph converter, mps converter">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <div class="row">
+            <!-- Tool Content -->
+            <div class="col-lg-8">
+                <h1 class="mb-4">Speed Converter</h1>
+                <p class="lead mb-4">Convert between different units of speed and velocity instantly.</p>
+
+                <!-- Tool Interface -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fromValue" class="form-label">From</label>
+                                <input type="number" class="form-control mb-2" id="fromValue" placeholder="Enter value">
+                                <select class="form-select" id="fromUnit">
+                                    <option value="kmh">Kilometers per Hour (km/h)</option>
+                                    <option value="mph">Miles per Hour (mph)</option>
+                                    <option value="mps">Meters per Second (m/s)</option>
+                                    <option value="fps">Feet per Second (ft/s)</option>
+                                    <option value="knot">Knots (kn)</option>
+                                    <option value="mach">Mach Number</option>
+                                    <option value="kps">Kilometers per Second (km/s)</option>
+                                    <option value="cmps">Centimeters per Second (cm/s)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="toValue" class="form-label">To</label>
+                                <input type="number" class="form-control mb-2" id="toValue" readonly>
+                                <select class="form-select" id="toUnit">
+                                    <option value="mph">Miles per Hour (mph)</option>
+                                    <option value="kmh">Kilometers per Hour (km/h)</option>
+                                    <option value="mps">Meters per Second (m/s)</option>
+                                    <option value="fps">Feet per Second (ft/s)</option>
+                                    <option value="knot">Knots (kn)</option>
+                                    <option value="mach">Mach Number</option>
+                                    <option value="kps">Kilometers per Second (km/s)</option>
+                                    <option value="cmps">Centimeters per Second (cm/s)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-primary" onclick="convert()">Convert</button>
+                            <button class="btn btn-secondary" onclick="swapUnits()">Swap Units</button>
+                            <button class="btn btn-danger" onclick="clearValues()">Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Common Conversions -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Common Conversions</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Multiply by</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Kilometers per Hour</td>
+                                        <td>Miles per Hour</td>
+                                        <td>0.621371</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Miles per Hour</td>
+                                        <td>Meters per Second</td>
+                                        <td>0.44704</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Knots</td>
+                                        <td>Miles per Hour</td>
+                                        <td>1.15078</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mach Number</td>
+                                        <td>Kilometers per Hour</td>
+                                        <td>1225.044</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Ad Space -->
+                <div class="ad-container mb-4">
+                    <div class="ad-placeholder bg-light p-3 text-center">
+                        Advertisement
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-info-circle text-info"></i> Use decimals for precise speed conversions</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Results are rounded to 6 decimal places</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Common in US: miles per hour (mph)</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Common in aviation: knots, Mach number</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Metric system: kilometers per hour (km/h)</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Scientific: meters per second (m/s)</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Related Tools -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Related Tools</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><a href="/tools/converters/length.html">Length Converter</a></li>
+                            <li class="list-group-item"><a href="/tools/converters/time.html">Time Converter</a></li>
+                            <li class="list-group-item"><a href="/tools/calculators/acceleration.html">Acceleration Calculator</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Conversion rates to meters per second (base unit)
+        const conversionRates = {
+            mps: 1,
+            kmh: 0.277778,
+            mph: 0.44704,
+            fps: 0.3048,
+            knot: 0.514444,
+            mach: 340.3,
+            kps: 1000,
+            cmps: 0.01
+        };
+
+        function convert() {
+            const fromValue = parseFloat(document.getElementById('fromValue').value);
+            const fromUnit = document.getElementById('fromUnit').value;
+            const toUnit = document.getElementById('toUnit').value;
+
+            if (isNaN(fromValue)) {
+                document.getElementById('toValue').value = '';
+                return;
+            }
+
+            // Convert to meters per second first (base unit)
+            const mps = fromValue * conversionRates[fromUnit];
+            
+            // Convert from meters per second to target unit
+            const result = mps / conversionRates[toUnit];
+            
+            document.getElementById('toValue').value = result.toFixed(6);
+        }
+
+        function swapUnits() {
+            const fromUnit = document.getElementById('fromUnit');
+            const toUnit = document.getElementById('toUnit');
+            const fromValue = document.getElementById('fromValue');
+            const toValue = document.getElementById('toValue');
+
+            // Swap unit selections
+            const temp = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = temp;
+
+            // Swap values if both exist
+            if (fromValue.value && toValue.value) {
+                const tempVal = fromValue.value;
+                fromValue.value = toValue.value;
+                toValue.value = tempVal;
+            }
+        }
+
+        function clearValues() {
+            document.getElementById('fromValue').value = '';
+            document.getElementById('toValue').value = '';
+        }
+
+        // Auto-convert when input value changes or units change
+        document.getElementById('fromValue').addEventListener('input', convert);
+        document.getElementById('fromUnit').addEventListener('change', convert);
+        document.getElementById('toUnit').addEventListener('change', convert);
+    </script>
+</body>
+</html> 

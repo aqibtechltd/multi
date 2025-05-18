@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Text Extractor - Multi-Tools</title>
+    <meta name="description" content="Extract text from images using OCR. Convert images to editable text. Free online text extraction tool.">
+    <meta name="keywords" content="image text extractor, OCR, text recognition, image to text">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .image-container {
+            max-height: 500px;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #previewImage {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 0.25rem;
+        }
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            display: none;
+        }
+        .progress-container {
+            width: 80%;
+            max-width: 300px;
+        }
+        .text-preview {
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .confidence-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+            vertical-align: middle;
+        }
+        .confidence-high {
+            background-color: #28a745;
+        }
+        .confidence-medium {
+            background-color: #ffc107;
+        }
+        .confidence-low {
+            background-color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Text Extractor</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4 text-center" id="uploadArea">
+                            <input type="file" id="imageInput" accept="image/*" class="d-none">
+                            <button class="btn btn-primary" onclick="document.getElementById('imageInput').click()">
+                                <i class="bi bi-upload"></i> Upload Image
+                            </button>
+                            <p class="text-muted small mt-2">Supports JPG, PNG, WebP (Max 10MB)</p>
+                        </div>
+
+                        <!-- Editor Area -->
+                        <div class="d-none" id="editorArea">
+                            <!-- Image Preview -->
+                            <div class="image-container">
+                                <img id="previewImage" src="" alt="Preview">
+                                <div class="loading-overlay" id="loadingOverlay">
+                                    <div class="progress-container">
+                                        <div class="progress">
+                                            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                                 role="progressbar" style="width: 100%">
+                                                Processing...
+                                            </div>
+                                        </div>
+                                        <div class="text-center mt-2" id="progressText">
+                                            Loading Tesseract.js...
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- OCR Settings -->
+                            <div class="mb-4">
+                                <h6 class="text-center mb-3">OCR Settings</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Language</label>
+                                        <select class="form-select" id="language">
+                                            <option value="eng">English</option>
+                                            <option value="fra">French</option>
+                                            <option value="deu">German</option>
+                                            <option value="spa">Spanish</option>
+                                            <option value="ita">Italian</option>
+                                            <option value="por">Portuguese</option>
+                                            <option value="rus">Russian</option>
+                                            <option value="chi_sim">Chinese (Simplified)</option>
+                                            <option value="jpn">Japanese</option>
+                                            <option value="kor">Korean</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Image Processing</label>
+                                        <select class="form-select" id="imageProcessing">
+                                            <option value="none">None</option>
+                                            <option value="grayscale">Grayscale</option>
+                                            <option value="threshold">Threshold</option>
+                                            <option value="sharpen">Sharpen</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="text-center mb-4">
+                                <button class="btn btn-primary" onclick="extractText()">
+                                    <i class="bi bi-text-paragraph"></i> Extract Text
+                                </button>
+                            </div>
+
+                            <!-- Results Area -->
+                            <div class="mb-4 d-none" id="resultsArea">
+                                <h6 class="mb-3">Extracted Text</h6>
+                                <div class="mb-3">
+                                    <span class="confidence-indicator confidence-high"></span>High Confidence
+                                    <span class="confidence-indicator confidence-medium ms-3"></span>Medium Confidence
+                                    <span class="confidence-indicator confidence-low ms-3"></span>Low Confidence
+                                </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <pre class="text-preview" id="extractedText"></pre>
+                                    </div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <button class="btn btn-outline-primary" onclick="copyText()">
+                                        <i class="bi bi-clipboard"></i> Copy Text
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="downloadText()">
+                                        <i class="bi bi-download"></i> Download as TXT
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Results</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Use clear, high-resolution images</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Ensure text has good contrast with background</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Try different image processing options</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Select the correct language for better accuracy</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4.1.1/dist/tesseract.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Variables
+        let originalImage = null;
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+        let extractedTextContent = '';
+
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const editorArea = document.getElementById('editorArea');
+        const previewImage = document.getElementById('previewImage');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const progressText = document.getElementById('progressText');
+        const resultsArea = document.getElementById('resultsArea');
+        const extractedText = document.getElementById('extractedText');
+
+        // Setup event listeners
+        imageInput.addEventListener('change', handleImageUpload);
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            if (file.size > maxFileSize) {
+                alert('File is too large. Maximum size is 10MB.');
+                return;
+            }
+
+            if (!supportedFormats.includes(file.type)) {
+                alert('Unsupported file format. Please use JPG, PNG, or WebP.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                originalImage = e.target.result;
+                previewImage.src = originalImage;
+                uploadArea.classList.add('d-none');
+                editorArea.classList.remove('d-none');
+                resultsArea.classList.add('d-none');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function extractText() {
+            if (!originalImage) return;
+
+            loadingOverlay.style.display = 'flex';
+            resultsArea.classList.add('d-none');
+
+            try {
+                const language = document.getElementById('language').value;
+                const processing = document.getElementById('imageProcessing').value;
+
+                // Process image if needed
+                let imageToProcess = originalImage;
+                if (processing !== 'none') {
+                    imageToProcess = await processImage(originalImage, processing);
+                }
+
+                // Initialize Tesseract
+                const worker = await Tesseract.createWorker({
+                    logger: message => {
+                        if (message.status === 'recognizing text') {
+                            progressText.textContent = `Recognizing text... ${Math.round(message.progress * 100)}%`;
+                        } else {
+                            progressText.textContent = message.status;
+                        }
+                    }
+                });
+
+                // Load language and recognize text
+                await worker.loadLanguage(language);
+                await worker.initialize(language);
+                const result = await worker.recognize(imageToProcess);
+                await worker.terminate();
+
+                // Display results
+                displayResults(result);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error processing image. Please try again.');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        }
+
+        async function processImage(imageData, type) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+
+                    ctx.drawImage(img, 0, 0);
+
+                    switch (type) {
+                        case 'grayscale':
+                            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const data = imageData.data;
+                            for (let i = 0; i < data.length; i += 4) {
+                                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                                data[i] = data[i + 1] = data[i + 2] = avg;
+                            }
+                            ctx.putImageData(imageData, 0, 0);
+                            break;
+
+                        case 'threshold':
+                            const thresholdData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                            const pixels = thresholdData.data;
+                            for (let i = 0; i < pixels.length; i += 4) {
+                                const avg = (pixels[i] + pixels[i + 1] + pixels[i + 2]) / 3;
+                                const value = avg > 128 ? 255 : 0;
+                                pixels[i] = pixels[i + 1] = pixels[i + 2] = value;
+                            }
+                            ctx.putImageData(thresholdData, 0, 0);
+                            break;
+
+                        case 'sharpen':
+                            ctx.filter = 'contrast(1.4) sharpen(1)';
+                            ctx.drawImage(img, 0, 0);
+                            break;
+                    }
+
+                    resolve(canvas.toDataURL());
+                };
+                img.src = imageData;
+            });
+        }
+
+        function displayResults(result) {
+            extractedTextContent = result.data.text;
+            let formattedText = '';
+            let lastConfidence = 0;
+
+            result.data.words.forEach(word => {
+                const confidence = word.confidence;
+                let color;
+
+                if (confidence > 90) {
+                    color = '#28a745';
+                } else if (confidence > 75) {
+                    color = '#ffc107';
+                } else {
+                    color = '#dc3545';
+                }
+
+                if (lastConfidence !== confidence) {
+                    formattedText += `</span><span style="color: ${color}">`;
+                    lastConfidence = confidence;
+                }
+
+                formattedText += word.text + ' ';
+            });
+
+            extractedText.innerHTML = formattedText;
+            resultsArea.classList.remove('d-none');
+        }
+
+        function copyText() {
+            navigator.clipboard.writeText(extractedTextContent).then(() => {
+                const button = document.querySelector('button[onclick="copyText()"]');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                setTimeout(() => button.innerHTML = originalText, 2000);
+            });
+        }
+
+        function downloadText() {
+            const blob = new Blob([extractedTextContent], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'extracted-text.txt';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html> 

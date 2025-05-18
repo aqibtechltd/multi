@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Keyword Extractor - Smart Keyword Analysis | Multi Tools</title>
+    <meta name="description" content="Extract important keywords and phrases from your text using advanced AI. Get insights into key topics and themes.">
+    <meta name="keywords" content="keyword extractor, key phrase extraction, topic analysis, keyword analysis, text mining">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .text-area {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            resize: vertical;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .keyword-card {
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+            cursor: pointer;
+        }
+        .keyword-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .keyword-badge {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            margin: 0.25rem;
+            display: inline-block;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .keyword-badge:hover {
+            transform: scale(1.05);
+        }
+        .relevance-score {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .topic-cluster {
+            border-left: 3px solid var(--primary-color);
+            padding: 0.5rem 1rem;
+            margin-bottom: 1rem;
+            background-color: var(--light-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="mb-2">Extracting Keywords</h5>
+            <p class="mb-0 text-muted" id="loadingStatus">Analyzing your text...</p>
+        </div>
+    </div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">AI Keyword Extractor</h1>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Text Input -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <textarea class="form-control text-area" id="textInput" 
+                                    placeholder="Enter or paste your text here for keyword extraction..."></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button class="btn btn-primary" id="extractBtn">
+                                    <i class="bi bi-search"></i> Extract Keywords
+                                </button>
+                                <button class="btn btn-outline-secondary" id="clearBtn">
+                                    <i class="bi bi-x-lg"></i> Clear
+                                </button>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-primary" id="copyBtn" data-bs-toggle="tooltip" title="Copy text">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" id="downloadBtn" data-bs-toggle="tooltip" title="Download results">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Extraction Results -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Extracted Keywords</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="chart-container" id="keywordChart">
+                                    <!-- Chart will be rendered here -->
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div id="keywordsContainer">
+                                    <!-- Keywords will be added here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6>Topic Clusters</h6>
+                            <div id="topicClustersContainer">
+                                <!-- Topic clusters will be added here -->
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6>Named Entities</h6>
+                            <div id="entitiesContainer">
+                                <!-- Named entities will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Extraction Settings -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Extraction Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Extraction Mode</label>
+                            <select class="form-select" id="extractionMode">
+                                <option value="basic">Basic Keywords</option>
+                                <option value="advanced">Advanced Analysis</option>
+                                <option value="technical">Technical Terms</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Language</label>
+                            <select class="form-select" id="language">
+                                <option value="en">English</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Maximum Keywords</label>
+                            <input type="range" class="form-range" id="maxKeywords" min="5" max="50" value="20">
+                            <small class="text-muted" id="maxKeywordsValue">20 keywords</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Analysis Options</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeTopics" checked>
+                                <label class="form-check-label" for="includeTopics">
+                                    Topic Clustering
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeEntities" checked>
+                                <label class="form-check-label" for="includeEntities">
+                                    Named Entity Recognition
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="includeRelevance" checked>
+                                <label class="form-check-label" for="includeRelevance">
+                                    Show Relevance Scores
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Extraction Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <h6><i class="bi bi-lightbulb text-warning"></i> Best Practices</h6>
+                                <ul class="list-unstyled">
+                                    <li><small>• Use longer text samples</small></li>
+                                    <li><small>• Include context and details</small></li>
+                                    <li><small>• Use proper formatting</small></li>
+                                </ul>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-gear text-primary"></i> Features</h6>
+                                <ul class="list-unstyled">
+                                    <li><small>• Topic clustering</small></li>
+                                    <li><small>• Entity recognition</small></li>
+                                    <li><small>• Relevance scoring</small></li>
+                                </ul>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-link text-success"></i> Related Tools</h6>
+                                <ul class="list-unstyled">
+                                    <li><small>• <a href="summarizer.html">Text Summarizer</a></small></li>
+                                    <li><small>• <a href="content-rewriter.html">Content Rewriter</a></small></li>
+                                    <li><small>• <a href="sentiment-analyzer.html">Sentiment Analyzer</a></small></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom JS -->
+    <script src="../../js/keyword-extractor.js"></script>
+</body>
+</html> 

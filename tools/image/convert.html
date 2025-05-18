@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Converter - Multi-Tools</title>
+    <meta name="description" content="Convert images between different formats. Support for JPG, PNG, WebP, GIF, and more. Free online image converter.">
+    <meta name="keywords" content="image converter, format converter, jpg to png, png to webp, image format">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .drop-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.5rem;
+            padding: 2rem;
+            text-align: center;
+            transition: border-color 0.3s ease;
+            cursor: pointer;
+        }
+        .drop-zone:hover {
+            border-color: #6c757d;
+        }
+        .drop-zone.dragover {
+            border-color: #0d6efd;
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+        .preview-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .preview-item {
+            position: relative;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        .preview-item img {
+            max-width: 100%;
+            height: auto;
+            max-height: 200px;
+            object-fit: contain;
+        }
+        .remove-button {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            z-index: 1;
+        }
+        .format-info {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Converter</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4">
+                            <div class="drop-zone" id="dropZone">
+                                <i class="bi bi-arrow-repeat display-4"></i>
+                                <p class="mb-2">Drag and drop images here or click to upload</p>
+                                <p class="text-muted small mb-0">Supports JPG, PNG, WebP, GIF (Max 10MB per file)</p>
+                                <input type="file" id="fileInput" multiple accept="image/*" class="d-none">
+                            </div>
+                        </div>
+
+                        <!-- Conversion Options -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">Conversion Settings</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Output Format</label>
+                                    <select class="form-select" id="outputFormat">
+                                        <option value="image/jpeg">JPG</option>
+                                        <option value="image/png">PNG</option>
+                                        <option value="image/webp">WebP</option>
+                                        <option value="image/gif">GIF</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Quality</label>
+                                    <select class="form-select" id="quality">
+                                        <option value="1.0">Maximum (100%)</option>
+                                        <option value="0.8" selected>High (80%)</option>
+                                        <option value="0.6">Medium (60%)</option>
+                                        <option value="0.4">Low (40%)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Area -->
+                        <div class="mb-4 d-none" id="previewArea">
+                            <h5 class="mb-3">Selected Images</h5>
+                            <div class="preview-container" id="previewContainer"></div>
+                        </div>
+
+                        <!-- Convert Button -->
+                        <div class="text-center">
+                            <button class="btn btn-primary" onclick="convertImages()" id="convertButton" disabled>
+                                <i class="bi bi-arrow-repeat"></i> Convert Images
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Format Information -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Format Information</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="format-info">
+                                    <h6>JPG</h6>
+                                    <p class="mb-0">Best for photographs and complex images with many colors. Lossy compression.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="format-info">
+                                    <h6>PNG</h6>
+                                    <p class="mb-0">Best for images with transparency and sharp edges. Lossless compression.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="format-info">
+                                    <h6>WebP</h6>
+                                    <p class="mb-0">Modern format with excellent compression. Supports both lossy and lossless.</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="format-info">
+                                    <h6>GIF</h6>
+                                    <p class="mb-0">Best for simple animations and images with limited colors.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Results</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Choose WebP for best compression and quality</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Use PNG for images with transparency</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Select appropriate quality level for your needs</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Convert multiple images in batch</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // File handling variables
+        let selectedFiles = [];
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+        // DOM Elements
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('fileInput');
+        const previewArea = document.getElementById('previewArea');
+        const previewContainer = document.getElementById('previewContainer');
+        const convertButton = document.getElementById('convertButton');
+
+        // Setup drag and drop events
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+            document.body.addEventListener(eventName, preventDefaults, false);
+        });
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        dropZone.addEventListener('drop', handleDrop, false);
+        dropZone.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', handleFiles);
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        function highlight(e) {
+            dropZone.classList.add('dragover');
+        }
+
+        function unhighlight(e) {
+            dropZone.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles({ target: { files } });
+        }
+
+        function handleFiles(e) {
+            const files = [...e.target.files];
+            const validFiles = files.filter(file => {
+                if (file.size > maxFileSize) {
+                    alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                    return false;
+                }
+                if (!supportedFormats.includes(file.type)) {
+                    alert(`File ${file.name} is not a supported image format.`);
+                    return false;
+                }
+                return true;
+            });
+
+            if (validFiles.length > 0) {
+                selectedFiles = selectedFiles.concat(validFiles);
+                updatePreview();
+                convertButton.disabled = false;
+            }
+        }
+
+        function updatePreview() {
+            previewArea.classList.remove('d-none');
+            previewContainer.innerHTML = '';
+
+            selectedFiles.forEach((file, index) => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const preview = document.createElement('div');
+                    preview.className = 'preview-item';
+                    preview.innerHTML = `
+                        <button class="btn btn-sm btn-outline-danger remove-button" onclick="removeFile(${index})">
+                            <i class="bi bi-x"></i>
+                        </button>
+                        <div class="text-center">
+                            <img src="${e.target.result}" alt="${file.name}" class="mb-2">
+                            <h6 class="mb-1">${file.name}</h6>
+                            <p class="text-muted small mb-0">
+                                ${formatFileSize(file.size)} - ${file.type.split('/')[1].toUpperCase()}
+                            </p>
+                            <div class="progress mt-2 d-none">
+                                <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    `;
+                    previewContainer.appendChild(preview);
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            updatePreview();
+            if (selectedFiles.length === 0) {
+                previewArea.classList.add('d-none');
+                convertButton.disabled = true;
+            }
+        }
+
+        async function convertImages() {
+            const outputFormat = document.getElementById('outputFormat').value;
+            const quality = parseFloat(document.getElementById('quality').value);
+            const previewItems = document.querySelectorAll('.preview-item');
+
+            convertButton.disabled = true;
+
+            try {
+                for (let i = 0; i < selectedFiles.length; i++) {
+                    const file = selectedFiles[i];
+                    const previewItem = previewItems[i];
+                    const progressBar = previewItem.querySelector('.progress');
+                    const progressBarInner = progressBar.querySelector('.progress-bar');
+                    
+                    progressBar.classList.remove('d-none');
+
+                    try {
+                        const img = await createImage(file);
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+
+                        // Update progress
+                        progressBarInner.style.width = '50%';
+
+                        // Convert to new format
+                        const blob = await new Promise(resolve => {
+                            canvas.toBlob(resolve, outputFormat, quality);
+                        });
+
+                        // Update progress
+                        progressBarInner.style.width = '100%';
+
+                        // Download converted image
+                        const extension = outputFormat.split('/')[1];
+                        const fileName = file.name.replace(/\.[^/.]+$/, '') + '.' + extension;
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = URL.createObjectURL(blob);
+                        downloadLink.download = fileName;
+                        downloadLink.click();
+                        URL.revokeObjectURL(downloadLink.href);
+
+                        // Update preview with conversion results
+                        const resultText = previewItem.querySelector('.text-muted');
+                        resultText.textContent = `${formatFileSize(file.size)} → ${formatFileSize(blob.size)} (${extension.toUpperCase()})`;
+                        progressBar.classList.add('bg-success');
+                    } catch (error) {
+                        console.error(`Error converting ${file.name}:`, error);
+                        progressBar.classList.add('bg-danger');
+                    }
+                }
+            } finally {
+                convertButton.disabled = false;
+            }
+        }
+
+        function createImage(file) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+</html> 

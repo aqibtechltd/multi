@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Optimizer - Multi-Tools</title>
+    <meta name="description" content="Optimize images for web use. Reduce file size while maintaining quality. Support for JPG, PNG, WebP.">
+    <meta name="keywords" content="image optimizer, web optimization, image compression, webp converter">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .image-container {
+            max-height: 500px;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #previewImage {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 0.25rem;
+        }
+        .placeholder-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.25rem;
+            padding: 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .placeholder-upload:hover {
+            border-color: #0d6efd;
+            background-color: #f1f8ff;
+        }
+        .placeholder-upload i {
+            font-size: 2rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        .optimization-options {
+            margin-bottom: 1.5rem;
+        }
+        .range-control {
+            margin-bottom: 1rem;
+        }
+        .range-control label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        .range-control label span {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .comparison-view {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .comparison-view .image-wrapper {
+            flex: 1;
+            text-align: center;
+        }
+        .comparison-view img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 0.25rem;
+        }
+        .comparison-info {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+        .optimization-progress {
+            display: none;
+            margin: 1rem 0;
+        }
+        .optimization-result {
+            display: none;
+            margin: 1rem 0;
+        }
+        .result-table {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .result-table th {
+            width: 40%;
+            font-weight: 600;
+        }
+        .savings-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Optimizer</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4" id="uploadArea">
+                            <input type="file" id="imageInput" accept="image/*" class="d-none">
+                            <div class="placeholder-upload" onclick="document.getElementById('imageInput').click()">
+                                <i class="bi bi-image"></i>
+                                <h6>Upload Image</h6>
+                                <p class="text-muted small mb-0">Click to upload or drag & drop</p>
+                                <p class="text-muted small">Supports JPG, PNG, WebP (Max 10MB)</p>
+                            </div>
+                        </div>
+
+                        <!-- Editor Area -->
+                        <div class="d-none" id="editorArea">
+                            <!-- Optimization Options -->
+                            <div class="optimization-options">
+                                <h6 class="mb-3">Optimization Settings</h6>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="range-control">
+                                            <label>
+                                                Quality
+                                                <span id="qualityValue">80%</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="quality" 
+                                                   min="1" max="100" value="80">
+                                        </div>
+                                        <div class="range-control">
+                                            <label>
+                                                Maximum Width
+                                                <span id="maxWidthValue">1920px</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="maxWidth" 
+                                                   min="100" max="3840" step="100" value="1920">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Output Format</label>
+                                            <select class="form-select" id="outputFormat">
+                                                <option value="auto">Auto (Best Format)</option>
+                                                <option value="webp">WebP</option>
+                                                <option value="jpeg">JPEG</option>
+                                                <option value="png">PNG</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label">Optimization Level</label>
+                                            <select class="form-select" id="optimizationLevel">
+                                                <option value="lossless">Lossless (Best Quality)</option>
+                                                <option value="balanced" selected>Balanced</option>
+                                                <option value="aggressive">Aggressive (Smallest Size)</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="stripMetadata" checked>
+                                    <label class="form-check-label" for="stripMetadata">
+                                        Strip metadata (EXIF, XMP, etc.)
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Comparison View -->
+                            <div class="comparison-view">
+                                <div class="image-wrapper">
+                                    <h6>Original</h6>
+                                    <img id="originalImage" src="" alt="Original">
+                                    <div class="comparison-info" id="originalInfo">
+                                        Size: - KB<br>
+                                        Dimensions: - x -
+                                    </div>
+                                </div>
+                                <div class="image-wrapper">
+                                    <h6>Optimized</h6>
+                                    <img id="optimizedImage" src="" alt="Optimized">
+                                    <div class="comparison-info" id="optimizedInfo">
+                                        Size: - KB<br>
+                                        Dimensions: - x -
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Optimization Progress -->
+                            <div class="optimization-progress" id="progressArea">
+                                <div class="progress">
+                                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                         role="progressbar" style="width: 100%">
+                                        Optimizing...
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Optimization Result -->
+                            <div class="optimization-result" id="resultArea">
+                                <div class="alert alert-success">
+                                    <h6 class="alert-heading">Optimization Complete!</h6>
+                                    <table class="result-table">
+                                        <tr>
+                                            <th>Size Reduction</th>
+                                            <td>
+                                                <span id="sizeReduction">-</span>
+                                                <span class="badge bg-success savings-badge" id="savingsPercent">-</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>Output Format</th>
+                                            <td id="outputFormatResult">-</td>
+                                        </tr>
+                                        <tr>
+                                            <th>Processing Time</th>
+                                            <td id="processingTime">-</td>
+                                        </tr>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="text-center">
+                                <button class="btn btn-outline-secondary" onclick="resetOptimization()">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                </button>
+                                <button class="btn btn-primary" onclick="optimizeImage()">
+                                    <i class="bi bi-magic"></i> Optimize
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="downloadImage()">
+                                    <i class="bi bi-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Optimization</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Use WebP format for best compression</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Choose appropriate quality based on image content</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Set maximum width to match your website's needs</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Strip metadata if not needed for better compression</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Variables
+        let originalImage = null;
+        let optimizedImage = null;
+        let startTime = null;
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const editorArea = document.getElementById('editorArea');
+        const progressArea = document.getElementById('progressArea');
+        const resultArea = document.getElementById('resultArea');
+        const originalImageEl = document.getElementById('originalImage');
+        const optimizedImageEl = document.getElementById('optimizedImage');
+
+        // Setup event listeners
+        imageInput.addEventListener('change', handleImageUpload);
+        document.querySelectorAll('.form-range, .form-select').forEach(input => {
+            input.addEventListener('input', updateSettings);
+        });
+
+        // Drag and drop
+        const placeholder = document.querySelector('.placeholder-upload');
+        placeholder.addEventListener('dragover', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#0d6efd';
+            placeholder.style.backgroundColor = '#f1f8ff';
+        });
+
+        placeholder.addEventListener('dragleave', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#dee2e6';
+            placeholder.style.backgroundColor = '#f8f9fa';
+        });
+
+        placeholder.addEventListener('drop', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#dee2e6';
+            placeholder.style.backgroundColor = '#f8f9fa';
+            
+            const file = e.dataTransfer.files[0];
+            handleImageUpload({ target: { files: [file] } });
+        });
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            if (file.size > maxFileSize) {
+                alert('File is too large. Maximum size is 10MB.');
+                return;
+            }
+
+            if (!supportedFormats.includes(file.type)) {
+                alert('Unsupported file format. Please use JPG, PNG, or WebP.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                originalImage = e.target.result;
+                originalImageEl.src = originalImage;
+                uploadArea.classList.add('d-none');
+                editorArea.classList.remove('d-none');
+                updateOriginalInfo(file);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateOriginalInfo(file) {
+            const img = new Image();
+            img.onload = function() {
+                document.getElementById('originalInfo').innerHTML = `
+                    Size: ${formatFileSize(file.size)}<br>
+                    Dimensions: ${img.width} x ${img.height}
+                `;
+            };
+            img.src = URL.createObjectURL(file);
+        }
+
+        function updateSettings() {
+            document.getElementById('qualityValue').textContent = 
+                document.getElementById('quality').value + '%';
+            document.getElementById('maxWidthValue').textContent = 
+                document.getElementById('maxWidth').value + 'px';
+        }
+
+        async function optimizeImage() {
+            if (!originalImage) return;
+
+            startTime = performance.now();
+            progressArea.style.display = 'block';
+            resultArea.style.display = 'none';
+
+            try {
+                const quality = parseInt(document.getElementById('quality').value) / 100;
+                const maxWidth = parseInt(document.getElementById('maxWidth').value);
+                const outputFormat = document.getElementById('outputFormat').value;
+                const optimizationLevel = document.getElementById('optimizationLevel').value;
+                const stripMetadata = document.getElementById('stripMetadata').checked;
+
+                const options = {
+                    maxSizeMB: 10,
+                    maxWidthOrHeight: maxWidth,
+                    useWebWorker: true,
+                    fileType: outputFormat === 'auto' ? undefined : outputFormat,
+                    initialQuality: quality,
+                    alwaysKeepResolution: false,
+                    preserveExif: !stripMetadata
+                };
+
+                if (optimizationLevel === 'aggressive') {
+                    options.initialQuality *= 0.8;
+                } else if (optimizationLevel === 'lossless') {
+                    options.initialQuality = 1;
+                }
+
+                const img = await createImageBitmap(dataURItoBlob(originalImage));
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0);
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                const optimizedBlob = await imageCompression(blob, options);
+                const optimizedDataUrl = await imageCompression.getDataUrlFromFile(optimizedBlob);
+
+                optimizedImage = optimizedDataUrl;
+                optimizedImageEl.src = optimizedDataUrl;
+
+                const endTime = performance.now();
+                updateOptimizedInfo(optimizedBlob, endTime - startTime);
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error optimizing image. Please try again.');
+            } finally {
+                progressArea.style.display = 'none';
+            }
+        }
+
+        function updateOptimizedInfo(blob, processingTime) {
+            const img = new Image();
+            img.onload = function() {
+                const originalSize = dataURItoBlob(originalImage).size;
+                const optimizedSize = blob.size;
+                const savings = originalSize - optimizedSize;
+                const savingsPercent = Math.round((savings / originalSize) * 100);
+
+                document.getElementById('optimizedInfo').innerHTML = `
+                    Size: ${formatFileSize(optimizedSize)}<br>
+                    Dimensions: ${img.width} x ${img.height}
+                `;
+
+                document.getElementById('sizeReduction').textContent = 
+                    `${formatFileSize(savings)} saved`;
+                document.getElementById('savingsPercent').textContent = 
+                    `${savingsPercent}%`;
+                document.getElementById('outputFormatResult').textContent = 
+                    blob.type.split('/')[1].toUpperCase();
+                document.getElementById('processingTime').textContent = 
+                    `${Math.round(processingTime)}ms`;
+
+                resultArea.style.display = 'block';
+            };
+            img.src = URL.createObjectURL(blob);
+        }
+
+        function resetOptimization() {
+            optimizedImage = null;
+            optimizedImageEl.src = '';
+            document.getElementById('optimizedInfo').innerHTML = 'Size: - KB<br>Dimensions: - x -';
+            document.getElementById('quality').value = 80;
+            document.getElementById('maxWidth').value = 1920;
+            document.getElementById('outputFormat').value = 'auto';
+            document.getElementById('optimizationLevel').value = 'balanced';
+            document.getElementById('stripMetadata').checked = true;
+            updateSettings();
+            resultArea.style.display = 'none';
+        }
+
+        function downloadImage() {
+            if (!optimizedImage) return;
+
+            const link = document.createElement('a');
+            link.download = 'optimized-image.' + 
+                (document.getElementById('outputFormat').value === 'auto' ? 'webp' : 
+                 document.getElementById('outputFormat').value);
+            link.href = optimizedImage;
+            link.click();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function dataURItoBlob(dataURI) {
+            const byteString = atob(dataURI.split(',')[1]);
+            const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+            const ab = new ArrayBuffer(byteString.length);
+            const ia = new Uint8Array(ab);
+            for (let i = 0; i < byteString.length; i++) {
+                ia[i] = byteString.charCodeAt(i);
+            }
+            return new Blob([ab], { type: mimeString });
+        }
+    </script>
+</body>
+</html> 

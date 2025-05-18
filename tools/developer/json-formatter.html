@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JSON Formatter and Validator - Multi-Tools</title>
+    <meta name="description" content="Format, validate, and beautify JSON data with our free online JSON formatter tool. Built by Aqib Chaudhary.">
+    <meta name="keywords" content="json formatter, json validator, json beautifier, format json, validate json">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        #jsonInput, #jsonOutput {
+            font-family: monospace;
+            min-height: 300px;
+            white-space: pre;
+        }
+        .error-message {
+            color: #dc3545;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <div class="row">
+            <!-- Tool Content -->
+            <div class="col-lg-8">
+                <h1 class="mb-4">JSON Formatter</h1>
+                <p class="lead mb-4">Format, validate, and beautify your JSON data with this easy-to-use tool.</p>
+
+                <!-- Tool Interface -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="jsonInput" class="form-label">Input JSON</label>
+                            <textarea class="form-control" id="jsonInput" rows="12" placeholder="Paste your JSON here..."></textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-primary" onclick="formatJSON()">Format JSON</button>
+                                <button class="btn btn-secondary" onclick="minifyJSON()">Minify</button>
+                                <button class="btn btn-success" onclick="copyToClipboard()">Copy</button>
+                                <button class="btn btn-danger" onclick="clearJSON()">Clear</button>
+                            </div>
+                            <div class="form-check form-check-inline ms-3">
+                                <input class="form-check-input" type="checkbox" id="sortKeys" value="option1">
+                                <label class="form-check-label" for="sortKeys">Sort Keys</label>
+                            </div>
+                        </div>
+
+                        <div id="errorMessage" class="error-message mb-3" style="display: none;"></div>
+
+                        <div class="mb-3">
+                            <label for="jsonOutput" class="form-label">Formatted JSON</label>
+                            <textarea class="form-control" id="jsonOutput" rows="12" readonly></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Features</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                Format and beautify JSON with proper indentation
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                Validate JSON syntax and structure
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                Minify JSON by removing whitespace
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                Sort object keys alphabetically
+                            </li>
+                            <li class="list-group-item">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                Copy formatted JSON to clipboard
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Ad Space -->
+                <div class="ad-container mb-4">
+                    <div class="ad-placeholder bg-light p-3 text-center">
+                        Advertisement
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-info-circle text-info"></i> Paste JSON directly from your code</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Use minify for reduced file size</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Sort keys for consistent output</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Check error messages for validation</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Related Tools -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Related Tools</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><a href="/tools/developer/xml-formatter.html">XML Formatter</a></li>
+                            <li class="list-group-item"><a href="/tools/developer/html-formatter.html">HTML Formatter</a></li>
+                            <li class="list-group-item"><a href="/tools/developer/code-diff.html">Code Diff Checker</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        function formatJSON() {
+            const input = document.getElementById('jsonInput').value;
+            const sortKeys = document.getElementById('sortKeys').checked;
+            
+            try {
+                let parsed = JSON.parse(input);
+                const formatted = JSON.stringify(parsed, sortKeys ? Object.keys(parsed).sort() : null, 4);
+                document.getElementById('jsonOutput').value = formatted;
+                document.getElementById('errorMessage').style.display = 'none';
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = `Error: ${error.message}`;
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        function minifyJSON() {
+            const input = document.getElementById('jsonInput').value;
+            
+            try {
+                const parsed = JSON.parse(input);
+                const minified = JSON.stringify(parsed);
+                document.getElementById('jsonOutput').value = minified;
+                document.getElementById('errorMessage').style.display = 'none';
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = `Error: ${error.message}`;
+                document.getElementById('errorMessage').style.display = 'block';
+            }
+        }
+
+        function copyToClipboard() {
+            const output = document.getElementById('jsonOutput');
+            output.select();
+            document.execCommand('copy');
+            
+            // Show feedback
+            const originalText = document.querySelector('button:nth-child(3)').textContent;
+            document.querySelector('button:nth-child(3)').textContent = 'Copied!';
+            setTimeout(() => {
+                document.querySelector('button:nth-child(3)').textContent = originalText;
+            }, 2000);
+        }
+
+        function clearJSON() {
+            document.getElementById('jsonInput').value = '';
+            document.getElementById('jsonOutput').value = '';
+            document.getElementById('errorMessage').style.display = 'none';
+        }
+
+        // Add sample JSON on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const sampleJSON = {
+                "name": "JSON Formatter",
+                "version": "1.0",
+                "features": ["format", "validate", "minify"],
+                "settings": {
+                    "indentation": 4,
+                    "sortKeys": false
+                }
+            };
+            document.getElementById('jsonInput').value = JSON.stringify(sampleJSON, null, 4);
+        });
+    </script>
+</body>
+</html> 

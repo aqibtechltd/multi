@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Collage Maker - Multi-Tools</title>
+    <meta name="description" content="Create beautiful photo collages with various layouts. Combine multiple images into one.">
+    <meta name="keywords" content="image collage, photo collage, collage maker, photo grid">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .image-container {
+            max-height: 600px;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #previewCanvas {
+            max-width: 100%;
+            max-height: 600px;
+            border-radius: 0.25rem;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+        }
+        .placeholder-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.25rem;
+            padding: 1rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+        .placeholder-upload:hover {
+            border-color: #0d6efd;
+            background-color: #f1f8ff;
+        }
+        .placeholder-upload i {
+            font-size: 1.5rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+        }
+        .layouts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .layout-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        .layout-item:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+        .layout-item.active {
+            border-color: #0d6efd;
+            background-color: #e7f1ff;
+        }
+        .layout-preview {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 0.5rem;
+            border-radius: 0.25rem;
+            overflow: hidden;
+            border: 1px solid #dee2e6;
+        }
+        .layout-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .layout-name {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        .image-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .image-item {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+        }
+        .image-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            margin-right: 1rem;
+        }
+        .image-item-info {
+            flex-grow: 1;
+        }
+        .image-item-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .controls-section {
+            margin-bottom: 1.5rem;
+        }
+        .range-control {
+            margin-bottom: 1rem;
+        }
+        .range-control label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        .range-control label span {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Collage Maker</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- Image Upload Area -->
+                        <div class="mb-4">
+                            <input type="file" id="imageInput" accept="image/*" multiple class="d-none">
+                            <div class="placeholder-upload" onclick="document.getElementById('imageInput').click()">
+                                <i class="bi bi-images"></i>
+                                <h6>Upload Images</h6>
+                                <p class="text-muted small mb-0">Click to upload or drag & drop</p>
+                                <p class="text-muted small">Supports JPG, PNG, WebP (Max 10MB each)</p>
+                            </div>
+                        </div>
+
+                        <!-- Image List -->
+                        <div class="image-list mb-4" id="imageList">
+                            <!-- Images will be added here -->
+                        </div>
+
+                        <!-- Layout Selection -->
+                        <h6 class="mb-3">Choose Layout</h6>
+                        <div class="layouts-grid" id="layoutsGrid">
+                            <!-- Layouts will be added dynamically -->
+                        </div>
+
+                        <!-- Collage Settings -->
+                        <div class="controls-section">
+                            <h6 class="mb-3">Collage Settings</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="range-control">
+                                        <label>
+                                            Gap Size
+                                            <span id="gapSizeValue">10px</span>
+                                        </label>
+                                        <input type="range" class="form-range" id="gapSize" 
+                                               min="0" max="50" value="10">
+                                    </div>
+                                    <div class="range-control">
+                                        <label>
+                                            Border Radius
+                                            <span id="borderRadiusValue">5px</span>
+                                        </label>
+                                        <input type="range" class="form-range" id="borderRadius" 
+                                               min="0" max="50" value="5">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Background Color</label>
+                                        <input type="color" class="form-control form-control-color" 
+                                               id="backgroundColor" value="#ffffff">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Border Color</label>
+                                        <input type="color" class="form-control form-control-color" 
+                                               id="borderColor" value="#000000">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Area -->
+                        <div class="image-container">
+                            <canvas id="previewCanvas"></canvas>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="text-center">
+                            <button class="btn btn-outline-secondary" onclick="resetCollage()">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <button class="btn btn-primary" onclick="generateCollage()">
+                                <i class="bi bi-grid"></i> Generate Collage
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="downloadCollage()">
+                                <i class="bi bi-download"></i> Download
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Collages</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Use images with similar aspect ratios</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Try different layouts for best fit</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Adjust gap size for visual balance</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Choose complementary background colors</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Variables
+        let uploadedImages = [];
+        let currentLayout = null;
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+
+        // Layout definitions
+        const layouts = {
+            grid2x2: {
+                name: '2x2 Grid',
+                preview: '/images/layouts/grid2x2.jpg',
+                cells: [
+                    { x: 0, y: 0, w: 0.5, h: 0.5 },
+                    { x: 0.5, y: 0, w: 0.5, h: 0.5 },
+                    { x: 0, y: 0.5, w: 0.5, h: 0.5 },
+                    { x: 0.5, y: 0.5, w: 0.5, h: 0.5 }
+                ]
+            },
+            grid3x3: {
+                name: '3x3 Grid',
+                preview: '/images/layouts/grid3x3.jpg',
+                cells: [
+                    { x: 0, y: 0, w: 1/3, h: 1/3 },
+                    { x: 1/3, y: 0, w: 1/3, h: 1/3 },
+                    { x: 2/3, y: 0, w: 1/3, h: 1/3 },
+                    { x: 0, y: 1/3, w: 1/3, h: 1/3 },
+                    { x: 1/3, y: 1/3, w: 1/3, h: 1/3 },
+                    { x: 2/3, y: 1/3, w: 1/3, h: 1/3 },
+                    { x: 0, y: 2/3, w: 1/3, h: 1/3 },
+                    { x: 1/3, y: 2/3, w: 1/3, h: 1/3 },
+                    { x: 2/3, y: 2/3, w: 1/3, h: 1/3 }
+                ]
+            },
+            horizontal3: {
+                name: 'Horizontal 3',
+                preview: '/images/layouts/horizontal3.jpg',
+                cells: [
+                    { x: 0, y: 0, w: 1/3, h: 1 },
+                    { x: 1/3, y: 0, w: 1/3, h: 1 },
+                    { x: 2/3, y: 0, w: 1/3, h: 1 }
+                ]
+            },
+            vertical3: {
+                name: 'Vertical 3',
+                preview: '/images/layouts/vertical3.jpg',
+                cells: [
+                    { x: 0, y: 0, w: 1, h: 1/3 },
+                    { x: 0, y: 1/3, w: 1, h: 1/3 },
+                    { x: 0, y: 2/3, w: 1, h: 1/3 }
+                ]
+            },
+            featured: {
+                name: 'Featured',
+                preview: '/images/layouts/featured.jpg',
+                cells: [
+                    { x: 0, y: 0, w: 0.7, h: 1 },
+                    { x: 0.7, y: 0, w: 0.3, h: 0.5 },
+                    { x: 0.7, y: 0.5, w: 0.3, h: 0.5 }
+                ]
+            },
+            pyramid: {
+                name: 'Pyramid',
+                preview: '/images/layouts/pyramid.jpg',
+                cells: [
+                    { x: 0.25, y: 0, w: 0.5, h: 0.5 },
+                    { x: 0, y: 0.5, w: 0.5, h: 0.5 },
+                    { x: 0.5, y: 0.5, w: 0.5, h: 0.5 }
+                ]
+            }
+        };
+
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const imageList = document.getElementById('imageList');
+        const layoutsGrid = document.getElementById('layoutsGrid');
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Setup event listeners
+        imageInput.addEventListener('change', handleImageUpload);
+        document.querySelectorAll('.form-range, .form-control-color').forEach(input => {
+            input.addEventListener('input', updateCollage);
+        });
+
+        // Initialize layouts grid
+        function initializeLayoutsGrid() {
+            Object.entries(layouts).forEach(([key, layout]) => {
+                const div = document.createElement('div');
+                div.className = 'layout-item';
+                div.onclick = () => selectLayout(key);
+                div.innerHTML = `
+                    <div class="layout-preview">
+                        <img src="${layout.preview}" alt="${layout.name}">
+                    </div>
+                    <p class="layout-name">${layout.name}</p>
+                `;
+                layoutsGrid.appendChild(div);
+            });
+        }
+
+        // Drag and drop
+        const placeholder = document.querySelector('.placeholder-upload');
+        placeholder.addEventListener('dragover', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#0d6efd';
+            placeholder.style.backgroundColor = '#f1f8ff';
+        });
+
+        placeholder.addEventListener('dragleave', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#dee2e6';
+            placeholder.style.backgroundColor = '#f8f9fa';
+        });
+
+        placeholder.addEventListener('drop', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#dee2e6';
+            placeholder.style.backgroundColor = '#f8f9fa';
+            
+            const files = Array.from(e.dataTransfer.files);
+            handleImageUpload({ target: { files } });
+        });
+
+        async function handleImageUpload(e) {
+            const files = Array.from(e.target.files);
+            
+            for (const file of files) {
+                if (file.size > maxFileSize) {
+                    alert(`File ${file.name} is too large. Maximum size is 10MB.`);
+                    continue;
+                }
+
+                if (!supportedFormats.includes(file.type)) {
+                    alert(`File ${file.name} has unsupported format. Please use JPG, PNG, or WebP.`);
+                    continue;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.onload = function() {
+                        uploadedImages.push({
+                            name: file.name,
+                            size: file.size,
+                            type: file.type,
+                            width: img.width,
+                            height: img.height,
+                            src: img.src,
+                            image: img
+                        });
+                        updateImageList();
+                        if (currentLayout) {
+                            generateCollage();
+                        }
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateImageList() {
+            imageList.innerHTML = '';
+            uploadedImages.forEach((img, index) => {
+                const div = document.createElement('div');
+                div.className = 'image-item';
+                div.innerHTML = `
+                    <img src="${img.src}" alt="${img.name}">
+                    <div class="image-item-info">
+                        <p class="mb-0">${img.name}</p>
+                        <small class="text-muted">${formatFileSize(img.size)}</small>
+                    </div>
+                    <div class="image-item-actions">
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeImage(${index})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                `;
+                imageList.appendChild(div);
+            });
+        }
+
+        function removeImage(index) {
+            uploadedImages.splice(index, 1);
+            updateImageList();
+            if (currentLayout) {
+                generateCollage();
+            }
+        }
+
+        function selectLayout(layoutKey) {
+            currentLayout = layoutKey;
+            document.querySelectorAll('.layout-item').forEach(item => {
+                item.classList.toggle('active', 
+                    item.querySelector('.layout-name').textContent === layouts[layoutKey].name);
+            });
+            generateCollage();
+        }
+
+        function generateCollage() {
+            if (!currentLayout || uploadedImages.length === 0) return;
+
+            const layout = layouts[currentLayout];
+            const gapSize = parseInt(document.getElementById('gapSize').value);
+            const borderRadius = parseInt(document.getElementById('borderRadius').value);
+            const backgroundColor = document.getElementById('backgroundColor').value;
+            const borderColor = document.getElementById('borderColor').value;
+
+            // Set canvas size
+            canvas.width = 1200;
+            canvas.height = 1200;
+
+            // Draw background
+            ctx.fillStyle = backgroundColor;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw images
+            layout.cells.forEach((cell, index) => {
+                if (index >= uploadedImages.length) return;
+
+                const x = cell.x * canvas.width + gapSize;
+                const y = cell.y * canvas.height + gapSize;
+                const w = cell.w * canvas.width - gapSize * 2;
+                const h = cell.h * canvas.height - gapSize * 2;
+
+                // Draw border
+                ctx.fillStyle = borderColor;
+                roundRect(ctx, x - 1, y - 1, w + 2, h + 2, borderRadius);
+                ctx.fill();
+
+                // Create clipping path for border radius
+                ctx.save();
+                roundRect(ctx, x, y, w, h, borderRadius);
+                ctx.clip();
+
+                // Draw image
+                const img = uploadedImages[index].image;
+                const scale = Math.max(w / img.width, h / img.height);
+                const sw = w / scale;
+                const sh = h / scale;
+                const sx = (img.width - sw) / 2;
+                const sy = (img.height - sh) / 2;
+                ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+
+                ctx.restore();
+            });
+        }
+
+        function roundRect(ctx, x, y, w, h, r) {
+            if (w < 2 * r) r = w / 2;
+            if (h < 2 * r) r = h / 2;
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.arcTo(x + w, y, x + w, y + h, r);
+            ctx.arcTo(x + w, y + h, x, y + h, r);
+            ctx.arcTo(x, y + h, x, y, r);
+            ctx.arcTo(x, y, x + w, y, r);
+            ctx.closePath();
+        }
+
+        function updateCollage() {
+            document.getElementById('gapSizeValue').textContent = 
+                document.getElementById('gapSize').value + 'px';
+            document.getElementById('borderRadiusValue').textContent = 
+                document.getElementById('borderRadius').value + 'px';
+            generateCollage();
+        }
+
+        function resetCollage() {
+            uploadedImages = [];
+            currentLayout = null;
+            updateImageList();
+            document.querySelectorAll('.layout-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.getElementById('gapSize').value = 10;
+            document.getElementById('borderRadius').value = 5;
+            document.getElementById('backgroundColor').value = '#ffffff';
+            document.getElementById('borderColor').value = '#000000';
+            updateCollage();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function downloadCollage() {
+            if (!currentLayout || uploadedImages.length === 0) return;
+
+            const link = document.createElement('a');
+            link.download = 'collage.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Initialize layouts grid
+        initializeLayoutsGrid();
+    </script>
+</body>
+</html> 

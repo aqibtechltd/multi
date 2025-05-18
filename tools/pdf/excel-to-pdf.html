@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel to PDF Converter | Multi-Tools Website</title>
+    <meta name="description" content="Convert Excel spreadsheets (XLS/XLSX) to PDF format easily with our free online tool. Preserve formatting and data.">
+    <meta name="keywords" content="excel to pdf, xls to pdf, xlsx to pdf, spreadsheet converter, pdf converter">
+    <meta name="author" content="Aqib Chaudhary">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/style.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- SheetJS for Excel parsing -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    
+    <style>
+        .drop-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+        }
+        .preview-container {
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .sheet-preview {
+            margin-bottom: 2rem;
+        }
+        .sheet-preview:last-child {
+            margin-bottom: 0;
+        }
+        .sheet-name {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #4f46e5;
+        }
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .preview-table th, .preview-table td {
+            border: 1px solid #dee2e6;
+            padding: 0.5rem;
+            font-size: 0.875rem;
+        }
+        .preview-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        .file-info {
+            display: flex;
+            align-items: center;
+            padding: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .file-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+            color: #4f46e5;
+        }
+        .progress {
+            height: 0.5rem;
+        }
+        .format-info {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../../index.html">Multi-Tools</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">PDF Tools</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <h1 class="text-center mb-4">Excel to PDF Converter</h1>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- Tool Interface -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4">
+                            <div class="drop-zone" id="dropZone">
+                                <i class="fas fa-file-excel display-4 mb-3"></i>
+                                <p class="mb-2">Drag and drop Excel spreadsheet here or click to upload</p>
+                                <p class="text-muted small mb-0">Supports XLS/XLSX files (Max 10MB)</p>
+                                <input type="file" id="fileInput" accept=".xls,.xlsx" class="d-none">
+                            </div>
+                        </div>
+
+                        <!-- PDF Options -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">PDF Options</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Page Size</label>
+                                    <select class="form-select" id="pageSize">
+                                        <option value="a4">A4 (210 × 297 mm)</option>
+                                        <option value="letter">Letter (216 × 279 mm)</option>
+                                        <option value="legal">Legal (216 × 356 mm)</option>
+                                        <option value="landscape">Landscape</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Orientation</label>
+                                    <select class="form-select" id="orientation">
+                                        <option value="portrait">Portrait</option>
+                                        <option value="landscape">Landscape</option>
+                                        <option value="auto">Auto (Based on Content)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Scale</label>
+                                    <select class="form-select" id="scale">
+                                        <option value="fit">Fit to Page</option>
+                                        <option value="actual">Actual Size</option>
+                                        <option value="custom">Custom Scale</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Quality</label>
+                                    <select class="form-select" id="quality">
+                                        <option value="high">High</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="low">Low</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- File Info -->
+                        <div id="fileInfo" class="mb-4 d-none">
+                            <h5 class="mb-3">Selected Spreadsheet</h5>
+                            <div class="file-info">
+                                <i class="fas fa-file-excel file-icon"></i>
+                                <div>
+                                    <h6 class="mb-1" id="fileName">spreadsheet.xlsx</h6>
+                                    <p class="text-muted small mb-1" id="fileSize">0 KB</p>
+                                    <div class="progress d-none" id="progressBar">
+                                        <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Area -->
+                        <div id="previewArea" class="mb-4 d-none">
+                            <h5 class="mb-3">Spreadsheet Preview</h5>
+                            <div class="preview-container" id="previewContainer"></div>
+                        </div>
+
+                        <!-- Convert Button -->
+                        <div class="text-center">
+                            <button class="btn btn-primary" onclick="convertToPDF()" id="convertButton" disabled>
+                                <i class="fas fa-file-pdf"></i> Convert to PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information Card -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">About Excel to PDF Conversion</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="format-info">
+                                    <h6><i class="fas fa-info-circle"></i> Features</h6>
+                                    <ul class="mb-0">
+                                        <li>Preserve formatting & formulas</li>
+                                        <li>Support for XLS/XLSX files</li>
+                                        <li>Multiple sheet handling</li>
+                                        <li>Customizable output</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="format-info">
+                                    <h6><i class="fas fa-shield-alt"></i> Privacy & Security</h6>
+                                    <ul class="mb-0">
+                                        <li>100% secure processing</li>
+                                        <li>No file upload to servers</li>
+                                        <li>Local browser conversion</li>
+                                        <li>Instant file deletion</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>Created by Aqib Chaudhary | Multi-Tools Website</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../js/excel-to-pdf.js"></script>
+</body>
+</html> 

@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JPG to PDF Converter | Multi-Tools Website</title>
+    <meta name="description" content="Convert JPG images to PDF format easily with our free online tool. Batch convert multiple images into a single PDF file.">
+    <meta name="keywords" content="jpg to pdf, image to pdf, convert jpg to pdf, image converter, pdf converter">
+    <meta name="author" content="Aqib Chaudhary">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/style.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+    
+    <style>
+        .drop-zone {
+            border: 2px dashed #dee2e6;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .drop-zone:hover, .drop-zone.dragover {
+            border-color: #4f46e5;
+            background-color: #eef2ff;
+        }
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .preview-item {
+            position: relative;
+            border: 1px solid #dee2e6;
+            border-radius: 0.5rem;
+            padding: 0.5rem;
+        }
+        .preview-item img {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+        }
+        .remove-button {
+            position: absolute;
+            top: -0.5rem;
+            right: -0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .progress {
+            height: 0.5rem;
+        }
+        .format-info {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: #f8f9fa;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../../index.html">Multi-Tools</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">PDF Tools</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <h1 class="text-center mb-4">JPG to PDF Converter</h1>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <!-- Tool Interface -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4">
+                            <div class="drop-zone" id="dropZone">
+                                <i class="fas fa-file-pdf display-4 mb-3"></i>
+                                <p class="mb-2">Drag and drop JPG images here or click to upload</p>
+                                <p class="text-muted small mb-0">Supports JPG/JPEG images (Max 10MB per file)</p>
+                                <input type="file" id="fileInput" multiple accept=".jpg,.jpeg" class="d-none">
+                            </div>
+                        </div>
+
+                        <!-- PDF Options -->
+                        <div class="mb-4">
+                            <h5 class="mb-3">PDF Options</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Page Size</label>
+                                    <select class="form-select" id="pageSize">
+                                        <option value="a4">A4 (210 × 297 mm)</option>
+                                        <option value="letter">Letter (216 × 279 mm)</option>
+                                        <option value="legal">Legal (216 × 356 mm)</option>
+                                        <option value="auto">Auto (Based on Image)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Page Orientation</label>
+                                    <select class="form-select" id="orientation">
+                                        <option value="portrait">Portrait</option>
+                                        <option value="landscape">Landscape</option>
+                                        <option value="auto">Auto (Based on Image)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Image Quality</label>
+                                    <select class="form-select" id="quality">
+                                        <option value="high">High</option>
+                                        <option value="medium" selected>Medium</option>
+                                        <option value="low">Low</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Images per Page</label>
+                                    <select class="form-select" id="imagesPerPage">
+                                        <option value="1">1 Image per Page</option>
+                                        <option value="2">2 Images per Page</option>
+                                        <option value="4">4 Images per Page</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Area -->
+                        <div class="mb-4 d-none" id="previewArea">
+                            <h5 class="mb-3">Selected Images</h5>
+                            <div class="preview-container" id="previewContainer"></div>
+                        </div>
+
+                        <!-- Convert Button -->
+                        <div class="text-center">
+                            <button class="btn btn-primary" onclick="convertToPDF()" id="convertButton" disabled>
+                                <i class="fas fa-file-pdf"></i> Convert to PDF
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Information Card -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">About JPG to PDF Conversion</h5>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="format-info">
+                                    <h6><i class="fas fa-info-circle"></i> Features</h6>
+                                    <ul class="mb-0">
+                                        <li>Multiple images to single PDF</li>
+                                        <li>Customizable page settings</li>
+                                        <li>Quality control options</li>
+                                        <li>Drag & drop interface</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="format-info">
+                                    <h6><i class="fas fa-shield-alt"></i> Privacy & Security</h6>
+                                    <ul class="mb-0">
+                                        <li>100% secure file processing</li>
+                                        <li>Files never leave your device</li>
+                                        <li>No data storage or collection</li>
+                                        <li>Instant conversion</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>Created by Aqib Chaudhary | Multi-Tools Website</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../js/jpg-to-pdf.js"></script>
+</body>
+</html> 

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Bio Generator - Create Perfect Profiles | Multi Tools</title>
+    <meta name="description" content="Generate engaging social media bios for Instagram, Twitter, LinkedIn, and more. AI-powered suggestions with emojis and formatting options.">
+    <meta name="keywords" content="bio generator, social media bio, profile bio, instagram bio, twitter bio, linkedin bio">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .bio-preview {
+            background: white;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+        .bio-template {
+            cursor: pointer;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            border: 1px solid var(--bs-gray-200);
+        }
+        .bio-template:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            border-color: var(--bs-primary);
+        }
+        .emoji-picker {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 0.5rem;
+            padding: 1rem;
+            background: var(--bs-light);
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .emoji-item {
+            font-size: 1.2rem;
+            text-align: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s ease;
+        }
+        .emoji-item:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+        .character-count {
+            font-size: 0.875rem;
+            color: var(--bs-gray-600);
+        }
+        .character-count.warning {
+            color: var(--bs-warning);
+        }
+        .character-count.danger {
+            color: var(--bs-danger);
+        }
+        .platform-limits {
+            font-size: 0.875rem;
+            color: var(--bs-gray-600);
+            margin-bottom: 1rem;
+        }
+        .platform-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        .bio-section {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background: var(--bs-light);
+        }
+        .bio-section:hover {
+            background: var(--bs-light);
+        }
+        .formatting-toolbar {
+            margin-bottom: 1rem;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            background: white;
+            border: 1px solid var(--bs-gray-200);
+        }
+        .formatting-btn {
+            padding: 0.25rem 0.5rem;
+            margin-right: 0.25rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .formatting-btn:hover {
+            background: var(--bs-light);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">Social Media Bio Generator</h1>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Main Bio Generator -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Create Your Bio</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Platform Selection -->
+                        <div class="mb-4">
+                            <label class="form-label">Select Platform</label>
+                            <div class="btn-group w-100">
+                                <input type="radio" class="btn-check" name="platform" id="instagram" checked>
+                                <label class="btn btn-outline-primary" for="instagram">
+                                    <i class="bi bi-instagram"></i> Instagram
+                                </label>
+                                <input type="radio" class="btn-check" name="platform" id="twitter">
+                                <label class="btn btn-outline-primary" for="twitter">
+                                    <i class="bi bi-twitter-x"></i> Twitter
+                                </label>
+                                <input type="radio" class="btn-check" name="platform" id="linkedin">
+                                <label class="btn btn-outline-primary" for="linkedin">
+                                    <i class="bi bi-linkedin"></i> LinkedIn
+                                </label>
+                                <input type="radio" class="btn-check" name="platform" id="tiktok">
+                                <label class="btn btn-outline-primary" for="tiktok">
+                                    <i class="bi bi-tiktok"></i> TikTok
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Bio Sections -->
+                        <div class="bio-sections mb-4">
+                            <!-- Personal Info -->
+                            <div class="bio-section">
+                                <label class="form-label">Personal Info</label>
+                                <input type="text" class="form-control mb-2" id="name" 
+                                       placeholder="Your name or title">
+                                <input type="text" class="form-control mb-2" id="profession" 
+                                       placeholder="Your profession or role">
+                                <input type="text" class="form-control" id="location" 
+                                       placeholder="Location (optional)">
+                            </div>
+
+                            <!-- Bio Description -->
+                            <div class="bio-section">
+                                <label class="form-label">Bio Description</label>
+                                <div class="formatting-toolbar">
+                                    <span class="formatting-btn" data-format="bold">
+                                        <i class="bi bi-type-bold"></i>
+                                    </span>
+                                    <span class="formatting-btn" data-format="italic">
+                                        <i class="bi bi-type-italic"></i>
+                                    </span>
+                                    <span class="formatting-btn" data-format="emoji">
+                                        <i class="bi bi-emoji-smile"></i>
+                                    </span>
+                                    <span class="formatting-btn" data-format="link">
+                                        <i class="bi bi-link-45deg"></i>
+                                    </span>
+                                </div>
+                                <textarea class="form-control" id="bioDescription" rows="4"
+                                          placeholder="Write your bio description..."></textarea>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <div class="character-count">
+                                        <span id="charCount">0</span> / <span id="charLimit">150</span> characters
+                                    </div>
+                                    <button class="btn btn-sm btn-outline-primary" id="generateBtn">
+                                        <i class="bi bi-magic"></i> Generate with AI
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Links and Tags -->
+                            <div class="bio-section">
+                                <label class="form-label">Links and Tags</label>
+                                <input type="text" class="form-control mb-2" id="website" 
+                                       placeholder="Website URL">
+                                <input type="text" class="form-control" id="tags" 
+                                       placeholder="Tags or mentions (e.g., @company)">
+                            </div>
+                        </div>
+
+                        <!-- Emoji Picker -->
+                        <div class="mb-4">
+                            <label class="form-label">Add Emojis</label>
+                            <div class="emoji-picker" id="emojiPicker">
+                                <!-- Emojis will be loaded dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-outline-secondary" id="resetBtn">
+                                <i class="bi bi-arrow-counterclockwise"></i> Reset
+                            </button>
+                            <button class="btn btn-primary" id="copyBtn">
+                                <i class="bi bi-clipboard"></i> Copy Bio
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bio Preview -->
+                <div class="bio-preview">
+                    <h5 class="mb-3">Preview</h5>
+                    <div id="bioPreview" class="border-bottom pb-3 mb-3">
+                        <!-- Bio preview will be updated dynamically -->
+                    </div>
+                    <div class="platform-limits">
+                        <i class="bi bi-info-circle"></i>
+                        Character limits: Instagram (150), Twitter (160), LinkedIn (220), TikTok (80)
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Bio Templates -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Bio Templates</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="bio-template" data-template="professional">
+                            <h6>Professional</h6>
+                            <small class="text-muted">Perfect for business profiles</small>
+                            <hr>
+                            <p class="mb-0">📈 [Role] at [Company]<br>
+                            🎯 Helping businesses achieve [goal]<br>
+                            💡 [Expertise] specialist<br>
+                            🔗 [Website]</p>
+                        </div>
+
+                        <div class="bio-template" data-template="creative">
+                            <h6>Creative</h6>
+                            <small class="text-muted">Great for artists and creators</small>
+                            <hr>
+                            <p class="mb-0">✨ [Creative profession]<br>
+                            🎨 Creating [what you create]<br>
+                            📍 Based in [location]<br>
+                            👉 Check out my latest work</p>
+                        </div>
+
+                        <div class="bio-template" data-template="personal">
+                            <h6>Personal</h6>
+                            <small class="text-muted">Ideal for personal branding</small>
+                            <hr>
+                            <p class="mb-0">👋 Hey, I'm [name]<br>
+                            ❤️ Passionate about [interests]<br>
+                            🌟 [Personal motto]<br>
+                            📲 Let's connect!</p>
+                        </div>
+
+                        <div class="bio-template" data-template="minimalist">
+                            <h6>Minimalist</h6>
+                            <small class="text-muted">Clean and simple</small>
+                            <hr>
+                            <p class="mb-0">[Name] | [Profession]<br>
+                            [One-line description]<br>
+                            [Link]</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips and Best Practices -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Tips for Great Bios</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled">
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle text-success"></i>
+                                Keep it concise and clear
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle text-success"></i>
+                                Use relevant emojis sparingly
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle text-success"></i>
+                                Include a call-to-action
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle text-success"></i>
+                                Highlight your unique value
+                            </li>
+                            <li class="mb-3">
+                                <i class="bi bi-check-circle text-success"></i>
+                                Update regularly
+                            </li>
+                            <li>
+                                <i class="bi bi-check-circle text-success"></i>
+                                Use line breaks for readability
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../js/bio-generator.js"></script>
+</body>
+</html> 

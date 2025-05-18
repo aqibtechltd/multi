@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Color Picker - Multi-Tools</title>
+    <meta name="description" content="Extract colors from images. Pick colors, generate palettes, and get color codes. Free online color picker tool.">
+    <meta name="keywords" content="image color picker, color extractor, color palette generator, eyedropper tool">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .image-container {
+            max-height: 500px;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            cursor: crosshair;
+        }
+        #previewCanvas {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 0.25rem;
+        }
+        .color-preview {
+            width: 100px;
+            height: 100px;
+            border-radius: 0.5rem;
+            margin: 0 auto;
+            border: 2px solid #dee2e6;
+        }
+        .color-info {
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .color-value {
+            font-family: monospace;
+            font-size: 1.1rem;
+        }
+        .palette-color {
+            width: 50px;
+            height: 50px;
+            border-radius: 0.25rem;
+            margin: 0.25rem;
+            cursor: pointer;
+            border: 1px solid #dee2e6;
+        }
+        .color-history {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        .magnifier {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border: 2px solid #dee2e6;
+            border-radius: 50%;
+            pointer-events: none;
+            display: none;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Color Picker</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4 text-center" id="uploadArea">
+                            <input type="file" id="imageInput" accept="image/*" class="d-none">
+                            <button class="btn btn-primary" onclick="document.getElementById('imageInput').click()">
+                                <i class="bi bi-upload"></i> Upload Image
+                            </button>
+                            <p class="text-muted small mt-2">Supports JPG, PNG, WebP (Max 10MB)</p>
+                        </div>
+
+                        <!-- Editor Area -->
+                        <div class="d-none" id="editorArea">
+                            <!-- Image Preview -->
+                            <div class="image-container">
+                                <canvas id="previewCanvas"></canvas>
+                                <div class="magnifier" id="magnifier"></div>
+                            </div>
+
+                            <!-- Color Display -->
+                            <div class="row g-4">
+                                <div class="col-md-6">
+                                    <div class="color-preview" id="colorPreview"></div>
+                                    <div class="color-info">
+                                        <div class="color-value" id="hexValue">#000000</div>
+                                        <div class="color-value" id="rgbValue">rgb(0, 0, 0)</div>
+                                        <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyColor('hex')">
+                                            <i class="bi bi-clipboard"></i> Copy HEX
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-primary mt-2" onclick="copyColor('rgb')">
+                                            <i class="bi bi-clipboard"></i> Copy RGB
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6 class="text-center mb-3">Color History</h6>
+                                    <div class="color-history" id="colorHistory"></div>
+                                </div>
+                            </div>
+
+                            <!-- Color Palette -->
+                            <div class="mt-4">
+                                <h6 class="text-center mb-3">Generated Palette</h6>
+                                <div class="color-history" id="colorPalette"></div>
+                                <div class="text-center mt-3">
+                                    <button class="btn btn-outline-primary" onclick="generatePalette()">
+                                        <i class="bi bi-palette"></i> Generate Palette
+                                    </button>
+                                    <button class="btn btn-outline-secondary" onclick="copyPalette()">
+                                        <i class="bi bi-clipboard"></i> Copy Palette
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Results</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Click anywhere on the image to pick colors</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Use the magnifier for precise color selection</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Generate palettes from dominant colors</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Copy color codes in HEX or RGB format</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Variables
+        let originalImage = null;
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+        const colorHistory = new Set();
+        let currentPalette = [];
+
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const editorArea = document.getElementById('editorArea');
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        const magnifier = document.getElementById('magnifier');
+        const colorPreview = document.getElementById('colorPreview');
+        const hexValue = document.getElementById('hexValue');
+        const rgbValue = document.getElementById('rgbValue');
+        const colorHistoryContainer = document.getElementById('colorHistory');
+        const colorPaletteContainer = document.getElementById('colorPalette');
+
+        // Setup event listeners
+        imageInput.addEventListener('change', handleImageUpload);
+        canvas.addEventListener('mousemove', handleMouseMove);
+        canvas.addEventListener('click', handleColorPick);
+        canvas.addEventListener('mouseenter', () => magnifier.style.display = 'block');
+        canvas.addEventListener('mouseleave', () => magnifier.style.display = 'none');
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            if (file.size > maxFileSize) {
+                alert('File is too large. Maximum size is 10MB.');
+                return;
+            }
+
+            if (!supportedFormats.includes(file.type)) {
+                alert('Unsupported file format. Please use JPG, PNG, or WebP.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    uploadArea.classList.add('d-none');
+                    editorArea.classList.remove('d-none');
+                    generatePalette();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleMouseMove(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const color = getPixelColor(x, y);
+            
+            // Update magnifier position
+            magnifier.style.left = (e.clientX - rect.left - 75) + 'px';
+            magnifier.style.top = (e.clientY - rect.top - 75) + 'px';
+            
+            // Update magnifier content
+            const zoomCtx = document.createElement('canvas').getContext('2d');
+            zoomCtx.canvas.width = 150;
+            zoomCtx.canvas.height = 150;
+            zoomCtx.imageSmoothingEnabled = false;
+            zoomCtx.drawImage(canvas,
+                Math.floor(x - 5), Math.floor(y - 5), 10, 10,
+                0, 0, 150, 150
+            );
+            magnifier.style.backgroundImage = `url(${zoomCtx.canvas.toDataURL()})`;
+        }
+
+        function handleColorPick(e) {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const color = getPixelColor(x, y);
+            
+            updateColorDisplay(color);
+            addToHistory(color);
+        }
+
+        function getPixelColor(x, y) {
+            const pixel = ctx.getImageData(x, y, 1, 1).data;
+            return {
+                r: pixel[0],
+                g: pixel[1],
+                b: pixel[2]
+            };
+        }
+
+        function updateColorDisplay(color) {
+            const hex = rgbToHex(color.r, color.g, color.b);
+            const rgb = `rgb(${color.r}, ${color.g}, ${color.b})`;
+            
+            colorPreview.style.backgroundColor = rgb;
+            hexValue.textContent = hex;
+            rgbValue.textContent = rgb;
+        }
+
+        function addToHistory(color) {
+            const hex = rgbToHex(color.r, color.g, color.b);
+            if (colorHistory.has(hex)) return;
+            
+            colorHistory.add(hex);
+            const div = document.createElement('div');
+            div.className = 'palette-color';
+            div.style.backgroundColor = hex;
+            div.title = hex;
+            div.onclick = () => {
+                updateColorDisplay(color);
+            };
+            
+            colorHistoryContainer.appendChild(div);
+            if (colorHistory.size > 20) {
+                colorHistory.delete([...colorHistory][0]);
+                colorHistoryContainer.removeChild(colorHistoryContainer.firstChild);
+            }
+        }
+
+        function generatePalette() {
+            if (!originalImage) return;
+
+            // Simple palette generation by sampling points
+            const sampleSize = 50;
+            const colors = new Map();
+            
+            for (let i = 0; i < canvas.width; i += sampleSize) {
+                for (let j = 0; j < canvas.height; j += sampleSize) {
+                    const color = getPixelColor(i, j);
+                    const hex = rgbToHex(color.r, color.g, color.b);
+                    colors.set(hex, (colors.get(hex) || 0) + 1);
+                }
+            }
+
+            // Sort by frequency and take top 10
+            currentPalette = [...colors.entries()]
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 10)
+                .map(([hex]) => hex);
+
+            // Display palette
+            colorPaletteContainer.innerHTML = '';
+            currentPalette.forEach(hex => {
+                const div = document.createElement('div');
+                div.className = 'palette-color';
+                div.style.backgroundColor = hex;
+                div.title = hex;
+                div.onclick = () => {
+                    const color = hexToRgb(hex);
+                    updateColorDisplay(color);
+                };
+                colorPaletteContainer.appendChild(div);
+            });
+        }
+
+        function rgbToHex(r, g, b) {
+            return '#' + [r, g, b].map(x => {
+                const hex = x.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }).join('');
+        }
+
+        function hexToRgb(hex) {
+            const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+        }
+
+        function copyColor(format) {
+            const text = format === 'hex' ? hexValue.textContent : rgbValue.textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const button = format === 'hex' ? 
+                    document.querySelector('button[onclick="copyColor(\'hex\')"]') :
+                    document.querySelector('button[onclick="copyColor(\'rgb\')"]');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                setTimeout(() => button.innerHTML = originalText, 2000);
+            });
+        }
+
+        function copyPalette() {
+            const text = currentPalette.join('\n');
+            navigator.clipboard.writeText(text).then(() => {
+                const button = document.querySelector('button[onclick="copyPalette()"]');
+                const originalText = button.innerHTML;
+                button.innerHTML = '<i class="bi bi-check"></i> Copied!';
+                setTimeout(() => button.innerHTML = originalText, 2000);
+            });
+        }
+    </script>
+</body>
+</html> 

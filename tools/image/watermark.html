@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Watermark - Multi-Tools</title>
+    <meta name="description" content="Add text or image watermarks to your photos. Protect your images with custom watermarks. Free online watermark tool.">
+    <meta name="keywords" content="image watermark, photo watermark, add watermark, watermark maker">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .image-container {
+            max-height: 500px;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #previewCanvas {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 0.25rem;
+        }
+        .watermark-preview {
+            max-width: 100px;
+            max-height: 100px;
+            border: 1px solid #dee2e6;
+            border-radius: 0.25rem;
+            margin-top: 0.5rem;
+        }
+        .position-button {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            margin: 0.25rem;
+        }
+        .position-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 40px);
+            gap: 0.5rem;
+            justify-content: center;
+            margin: 1rem 0;
+        }
+        .color-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+            border: 1px solid #dee2e6;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Watermark</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4 text-center" id="uploadArea">
+                            <input type="file" id="imageInput" accept="image/*" class="d-none">
+                            <button class="btn btn-primary" onclick="document.getElementById('imageInput').click()">
+                                <i class="bi bi-upload"></i> Upload Image
+                            </button>
+                            <p class="text-muted small mt-2">Supports JPG, PNG, WebP (Max 10MB)</p>
+                        </div>
+
+                        <!-- Editor Area -->
+                        <div class="d-none" id="editorArea">
+                            <!-- Image Preview -->
+                            <div class="image-container mb-4">
+                                <canvas id="previewCanvas"></canvas>
+                            </div>
+
+                            <!-- Watermark Controls -->
+                            <div class="mb-4">
+                                <h5 class="mb-3">Watermark Settings</h5>
+                                <div class="row g-3">
+                                    <!-- Watermark Type -->
+                                    <div class="col-md-6">
+                                        <label class="form-label">Watermark Type</label>
+                                        <select class="form-select" id="watermarkType">
+                                            <option value="text">Text</option>
+                                            <option value="image">Image</option>
+                                        </select>
+                                    </div>
+
+                                    <!-- Text Watermark Settings -->
+                                    <div id="textSettings">
+                                        <div class="col-12">
+                                            <label class="form-label">Watermark Text</label>
+                                            <input type="text" class="form-control" id="watermarkText" placeholder="Enter your watermark text">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Font Family</label>
+                                            <select class="form-select" id="fontFamily">
+                                                <option value="Arial">Arial</option>
+                                                <option value="Times New Roman">Times New Roman</option>
+                                                <option value="Georgia">Georgia</option>
+                                                <option value="Verdana">Verdana</option>
+                                                <option value="Courier New">Courier New</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Font Size</label>
+                                            <input type="range" class="form-range" id="fontSize" min="12" max="72" value="24">
+                                            <div class="text-center" id="fontSizeValue">24px</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Text Color</label>
+                                            <div class="input-group">
+                                                <span class="input-group-text">
+                                                    <span class="color-preview" id="colorPreview"></span>
+                                                </span>
+                                                <input type="color" class="form-control form-control-color" id="textColor" value="#ffffff">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Opacity</label>
+                                            <input type="range" class="form-range" id="opacity" min="0" max="100" value="50">
+                                            <div class="text-center" id="opacityValue">50%</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Image Watermark Settings -->
+                                    <div id="imageSettings" class="d-none">
+                                        <div class="col-12 text-center">
+                                            <input type="file" id="watermarkImageInput" accept="image/*" class="d-none">
+                                            <button class="btn btn-outline-primary" onclick="document.getElementById('watermarkImageInput').click()">
+                                                <i class="bi bi-image"></i> Upload Watermark Image
+                                            </button>
+                                            <img id="watermarkPreview" class="watermark-preview d-none">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Size</label>
+                                            <input type="range" class="form-range" id="watermarkSize" min="10" max="100" value="30">
+                                            <div class="text-center" id="sizeValue">30%</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Opacity</label>
+                                            <input type="range" class="form-range" id="watermarkOpacity" min="0" max="100" value="50">
+                                            <div class="text-center" id="watermarkOpacityValue">50%</div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Position Controls -->
+                                    <div class="col-12">
+                                        <label class="form-label">Position</label>
+                                        <div class="position-grid">
+                                            <button class="btn btn-outline-secondary position-button" data-position="top-left">↖</button>
+                                            <button class="btn btn-outline-secondary position-button" data-position="top-center">↑</button>
+                                            <button class="btn btn-outline-secondary position-button" data-position="top-right">↗</button>
+                                            <button class="btn btn-outline-secondary position-button" data-position="middle-left">←</button>
+                                            <button class="btn btn-outline-secondary position-button" data-position="middle-center">•</button>
+                                            <button class="btn btn-outline-secondary position-button" data-position="middle-right">→</button>
+                                            <button class="btn btn-outline-secondary position-button" data-position="bottom-left">↙</button>
+                                            <button class="btn btn-outline-secondary position-button" data-position="bottom-center">↓</button>
+                                            <button class="btn btn-outline-secondary position-button" data-position="bottom-right">↘</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="text-center">
+                                <button class="btn btn-outline-secondary me-2" onclick="resetWatermark()">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                </button>
+                                <button class="btn btn-primary" onclick="saveImage()">
+                                    <i class="bi bi-download"></i> Save Image
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Results</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Use semi-transparent watermarks for less intrusion</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Position watermarks away from the main subject</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Choose contrasting colors for better visibility</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Consider using a logo as a watermark for branding</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Variables
+        let originalImage = null;
+        let watermarkImage = null;
+        let currentPosition = 'bottom-right';
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const watermarkImageInput = document.getElementById('watermarkImageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const editorArea = document.getElementById('editorArea');
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        const watermarkType = document.getElementById('watermarkType');
+        const textSettings = document.getElementById('textSettings');
+        const imageSettings = document.getElementById('imageSettings');
+
+        // Setup event listeners
+        imageInput.addEventListener('change', handleImageUpload);
+        watermarkImageInput.addEventListener('change', handleWatermarkImageUpload);
+        watermarkType.addEventListener('change', toggleWatermarkSettings);
+
+        document.querySelectorAll('.position-button').forEach(button => {
+            button.addEventListener('click', () => {
+                currentPosition = button.dataset.position;
+                document.querySelectorAll('.position-button').forEach(btn => 
+                    btn.classList.toggle('btn-primary', btn === button));
+                updateWatermark();
+            });
+        });
+
+        document.querySelectorAll('input, select').forEach(input => {
+            input.addEventListener('input', () => {
+                if (input.id === 'fontSize') {
+                    document.getElementById('fontSizeValue').textContent = `${input.value}px`;
+                } else if (input.id === 'opacity' || input.id === 'watermarkOpacity') {
+                    document.getElementById(input.id + 'Value').textContent = `${input.value}%`;
+                } else if (input.id === 'watermarkSize') {
+                    document.getElementById('sizeValue').textContent = `${input.value}%`;
+                }
+                updateWatermark();
+            });
+        });
+
+        function toggleWatermarkSettings() {
+            const isText = watermarkType.value === 'text';
+            textSettings.classList.toggle('d-none', !isText);
+            imageSettings.classList.toggle('d-none', isText);
+            updateWatermark();
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            if (file.size > maxFileSize) {
+                alert('File is too large. Maximum size is 10MB.');
+                return;
+            }
+
+            if (!supportedFormats.includes(file.type)) {
+                alert('Unsupported file format. Please use JPG, PNG, or WebP.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    uploadArea.classList.add('d-none');
+                    editorArea.classList.remove('d-none');
+                    updateWatermark();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function handleWatermarkImageUpload(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            if (!supportedFormats.includes(file.type)) {
+                alert('Unsupported file format. Please use JPG, PNG, or WebP.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    watermarkImage = img;
+                    document.getElementById('watermarkPreview').src = e.target.result;
+                    document.getElementById('watermarkPreview').classList.remove('d-none');
+                    updateWatermark();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateWatermark() {
+            if (!originalImage) return;
+
+            // Clear canvas and draw original image
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0);
+
+            if (watermarkType.value === 'text') {
+                addTextWatermark();
+            } else if (watermarkImage) {
+                addImageWatermark();
+            }
+        }
+
+        function addTextWatermark() {
+            const text = document.getElementById('watermarkText').value;
+            if (!text) return;
+
+            const fontSize = document.getElementById('fontSize').value;
+            const fontFamily = document.getElementById('fontFamily').value;
+            const color = document.getElementById('textColor').value;
+            const opacity = document.getElementById('opacity').value / 100;
+
+            ctx.font = `${fontSize}px ${fontFamily}`;
+            ctx.fillStyle = color;
+            ctx.globalAlpha = opacity;
+
+            const metrics = ctx.measureText(text);
+            const textWidth = metrics.width;
+            const textHeight = parseInt(fontSize);
+
+            const [x, y] = calculatePosition(textWidth, textHeight);
+            ctx.fillText(text, x, y);
+            ctx.globalAlpha = 1;
+        }
+
+        function addImageWatermark() {
+            const size = document.getElementById('watermarkSize').value / 100;
+            const opacity = document.getElementById('watermarkOpacity').value / 100;
+
+            const watermarkWidth = watermarkImage.width * size;
+            const watermarkHeight = watermarkImage.height * size;
+
+            const [x, y] = calculatePosition(watermarkWidth, watermarkHeight);
+
+            ctx.globalAlpha = opacity;
+            ctx.drawImage(watermarkImage, x, y, watermarkWidth, watermarkHeight);
+            ctx.globalAlpha = 1;
+        }
+
+        function calculatePosition(width, height) {
+            const padding = 20;
+            let x, y;
+
+            switch (currentPosition) {
+                case 'top-left':
+                    x = padding;
+                    y = padding + height;
+                    break;
+                case 'top-center':
+                    x = (canvas.width - width) / 2;
+                    y = padding + height;
+                    break;
+                case 'top-right':
+                    x = canvas.width - width - padding;
+                    y = padding + height;
+                    break;
+                case 'middle-left':
+                    x = padding;
+                    y = (canvas.height + height) / 2;
+                    break;
+                case 'middle-center':
+                    x = (canvas.width - width) / 2;
+                    y = (canvas.height + height) / 2;
+                    break;
+                case 'middle-right':
+                    x = canvas.width - width - padding;
+                    y = (canvas.height + height) / 2;
+                    break;
+                case 'bottom-left':
+                    x = padding;
+                    y = canvas.height - padding;
+                    break;
+                case 'bottom-center':
+                    x = (canvas.width - width) / 2;
+                    y = canvas.height - padding;
+                    break;
+                case 'bottom-right':
+                default:
+                    x = canvas.width - width - padding;
+                    y = canvas.height - padding;
+                    break;
+            }
+
+            return [x, y];
+        }
+
+        function resetWatermark() {
+            document.getElementById('watermarkText').value = '';
+            document.getElementById('fontSize').value = 24;
+            document.getElementById('fontSizeValue').textContent = '24px';
+            document.getElementById('textColor').value = '#ffffff';
+            document.getElementById('opacity').value = 50;
+            document.getElementById('opacityValue').textContent = '50%';
+            document.getElementById('watermarkSize').value = 30;
+            document.getElementById('sizeValue').textContent = '30%';
+            document.getElementById('watermarkOpacity').value = 50;
+            document.getElementById('watermarkOpacityValue').textContent = '50%';
+            watermarkImage = null;
+            document.getElementById('watermarkPreview').classList.add('d-none');
+            document.querySelectorAll('.position-button').forEach(btn => 
+                btn.classList.remove('btn-primary'));
+            currentPosition = 'bottom-right';
+            updateWatermark();
+        }
+
+        function saveImage() {
+            const link = document.createElement('a');
+            link.download = 'watermarked-image.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Initialize color preview
+        document.getElementById('textColor').addEventListener('input', function(e) {
+            document.getElementById('colorPreview').style.backgroundColor = e.target.value;
+        });
+        document.getElementById('colorPreview').style.backgroundColor = document.getElementById('textColor').value;
+    </script>
+</body>
+</html> 

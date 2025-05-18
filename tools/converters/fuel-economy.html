@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Economy Converter - Multi-Tools</title>
+    <meta name="description" content="Convert between different fuel economy units including MPG, L/100km, km/L, and more. Built by Aqib Chaudhary.">
+    <meta name="keywords" content="fuel economy converter, mpg converter, l/100km converter, km/l converter">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <div class="row">
+            <!-- Tool Content -->
+            <div class="col-lg-8">
+                <h1 class="mb-4">Fuel Economy Converter</h1>
+                <p class="lead mb-4">Convert between different units of fuel economy measurement instantly.</p>
+
+                <!-- Tool Interface -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fromValue" class="form-label">From</label>
+                                <input type="number" class="form-control mb-2" id="fromValue" placeholder="Enter value">
+                                <select class="form-select" id="fromUnit">
+                                    <option value="mpg">Miles per gallon (MPG)</option>
+                                    <option value="l100km">Liters per 100 kilometers (L/100km)</option>
+                                    <option value="kml">Kilometers per liter (km/L)</option>
+                                    <option value="mpgimp">Miles per imperial gallon (MPG UK)</option>
+                                    <option value="kmgal">Kilometers per gallon (km/gal)</option>
+                                    <option value="mpl">Miles per liter (mi/L)</option>
+                                    <option value="gp100m">Gallons per 100 miles (gal/100mi)</option>
+                                    <option value="lp100mi">Liters per 100 miles (L/100mi)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="toValue" class="form-label">To</label>
+                                <input type="number" class="form-control mb-2" id="toValue" readonly>
+                                <select class="form-select" id="toUnit">
+                                    <option value="l100km">Liters per 100 kilometers (L/100km)</option>
+                                    <option value="mpg">Miles per gallon (MPG)</option>
+                                    <option value="kml">Kilometers per liter (km/L)</option>
+                                    <option value="mpgimp">Miles per imperial gallon (MPG UK)</option>
+                                    <option value="kmgal">Kilometers per gallon (km/gal)</option>
+                                    <option value="mpl">Miles per liter (mi/L)</option>
+                                    <option value="gp100m">Gallons per 100 miles (gal/100mi)</option>
+                                    <option value="lp100mi">Liters per 100 miles (L/100mi)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-primary" onclick="convert()">Convert</button>
+                            <button class="btn btn-secondary" onclick="swapUnits()">Swap Units</button>
+                            <button class="btn btn-danger" onclick="clearValues()">Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Common Conversions -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Common Conversions</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Formula</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>MPG (US)</td>
+                                        <td>L/100km</td>
+                                        <td>235.215 ÷ MPG</td>
+                                    </tr>
+                                    <tr>
+                                        <td>L/100km</td>
+                                        <td>km/L</td>
+                                        <td>100 ÷ L/100km</td>
+                                    </tr>
+                                    <tr>
+                                        <td>MPG (US)</td>
+                                        <td>MPG (UK)</td>
+                                        <td>× 0.8327</td>
+                                    </tr>
+                                    <tr>
+                                        <td>km/L</td>
+                                        <td>MPG (US)</td>
+                                        <td>× 2.352</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Ad Space -->
+                <div class="ad-container mb-4">
+                    <div class="ad-placeholder bg-light p-3 text-center">
+                        Advertisement
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-info-circle text-info"></i> MPG is common in US</li>
+                            <li><i class="bi bi-info-circle text-info"></i> L/100km used in Europe/Canada</li>
+                            <li><i class="bi bi-info-circle text-info"></i> UK gallon ≠ US gallon</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Lower L/100km = better efficiency</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Higher MPG = better efficiency</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Results are rounded to 6 decimal places</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Related Tools -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Related Tools</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><a href="/tools/converters/volume.html">Volume Converter</a></li>
+                            <li class="list-group-item"><a href="/tools/calculators/fuel-cost.html">Fuel Cost Calculator</a></li>
+                            <li class="list-group-item"><a href="/tools/calculators/trip-calculator.html">Trip Calculator</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Constants for conversion
+        const LITERS_PER_US_GALLON = 3.78541;
+        const LITERS_PER_IMP_GALLON = 4.54609;
+        const MILES_PER_KM = 0.621371;
+        const KM_PER_MILE = 1.60934;
+
+        // Convert everything to L/100km first (base unit), then convert to target unit
+        function toL100km(value, fromUnit) {
+            switch(fromUnit) {
+                case 'l100km':
+                    return value;
+                case 'mpg':
+                    return 235.215 / value;
+                case 'kml':
+                    return 100 / value;
+                case 'mpgimp':
+                    return 282.481 / value;
+                case 'kmgal':
+                    return (100 * LITERS_PER_US_GALLON) / value;
+                case 'mpl':
+                    return 100 / (value * KM_PER_MILE);
+                case 'gp100m':
+                    return value * LITERS_PER_US_GALLON / KM_PER_MILE;
+                case 'lp100mi':
+                    return value / KM_PER_MILE;
+                default:
+                    return value;
+            }
+        }
+
+        function fromL100km(value, toUnit) {
+            switch(toUnit) {
+                case 'l100km':
+                    return value;
+                case 'mpg':
+                    return 235.215 / value;
+                case 'kml':
+                    return 100 / value;
+                case 'mpgimp':
+                    return 282.481 / value;
+                case 'kmgal':
+                    return (100 * LITERS_PER_US_GALLON) / value;
+                case 'mpl':
+                    return (100 / value) / KM_PER_MILE;
+                case 'gp100m':
+                    return (value * KM_PER_MILE) / LITERS_PER_US_GALLON;
+                case 'lp100mi':
+                    return value * KM_PER_MILE;
+                default:
+                    return value;
+            }
+        }
+
+        function convert() {
+            const fromValue = parseFloat(document.getElementById('fromValue').value);
+            const fromUnit = document.getElementById('fromUnit').value;
+            const toUnit = document.getElementById('toUnit').value;
+
+            if (isNaN(fromValue)) {
+                document.getElementById('toValue').value = '';
+                return;
+            }
+
+            // Convert to L/100km first (base unit)
+            const l100km = toL100km(fromValue, fromUnit);
+            
+            // Convert from L/100km to target unit
+            const result = fromL100km(l100km, toUnit);
+            
+            document.getElementById('toValue').value = result.toFixed(6);
+        }
+
+        function swapUnits() {
+            const fromUnit = document.getElementById('fromUnit');
+            const toUnit = document.getElementById('toUnit');
+            const fromValue = document.getElementById('fromValue');
+            const toValue = document.getElementById('toValue');
+
+            // Swap unit selections
+            const temp = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = temp;
+
+            // Swap values if both exist
+            if (fromValue.value && toValue.value) {
+                const tempVal = fromValue.value;
+                fromValue.value = toValue.value;
+                toValue.value = tempVal;
+            }
+        }
+
+        function clearValues() {
+            document.getElementById('fromValue').value = '';
+            document.getElementById('toValue').value = '';
+        }
+
+        // Auto-convert when input value changes or units change
+        document.getElementById('fromValue').addEventListener('input', convert);
+        document.getElementById('fromUnit').addEventListener('change', convert);
+        document.getElementById('toUnit').addEventListener('change', convert);
+    </script>
+</body>
+</html> 

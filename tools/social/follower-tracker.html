@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Follower Growth Tracker | Multi-Tools Website</title>
+    <meta name="description" content="Track and analyze your social media follower growth across multiple platforms with our comprehensive tracking tool.">
+    <meta name="keywords" content="follower tracker, social media analytics, growth tracking, follower analytics">
+    <meta name="author" content="Aqib Chaudhary">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/style.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <link href="https://cdn.jsdelivr.net/npm/chart.js" rel="stylesheet">
+    <!-- Date Range Picker -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css">
+    
+    <style>
+        .platform-card {
+            border-radius: 1rem;
+            transition: transform 0.3s ease;
+        }
+        .platform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .platform-icon {
+            width: 48px;
+            height: 48px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-bottom: 1rem;
+            color: white;
+            font-size: 1.5rem;
+        }
+        .instagram { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); }
+        .facebook { background: #1877f2; }
+        .twitter { background: #1da1f2; }
+        .linkedin { background: #0a66c2; }
+        .stats-card {
+            border-radius: 1rem;
+            background: white;
+            transition: all 0.3s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .growth-indicator {
+            font-size: 0.875rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.5rem;
+        }
+        .growth-positive {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .growth-negative {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+        .engagement-card {
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        .engagement-header {
+            padding: 1rem;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        .engagement-body {
+            padding: 1rem;
+        }
+        .engagement-metric {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        .engagement-metric-icon {
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            margin-right: 1rem;
+            background: #f8f9fa;
+        }
+        .export-options .btn {
+            border-radius: 0.5rem;
+            padding: 0.5rem 1rem;
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../../index.html">Multi-Tools</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Social Media Tools</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <h1 class="text-center mb-4">Social Media Follower Growth Tracker</h1>
+        
+        <!-- Platform Overview -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-3">
+                <div class="platform-card card h-100">
+                    <div class="card-body text-center">
+                        <div class="platform-icon instagram">
+                            <i class="fab fa-instagram"></i>
+                        </div>
+                        <h5>Instagram</h5>
+                        <h3 class="mb-2">15.2K</h3>
+                        <span class="growth-indicator growth-positive">
+                            <i class="fas fa-arrow-up"></i> 2.3%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="platform-card card h-100">
+                    <div class="card-body text-center">
+                        <div class="platform-icon facebook">
+                            <i class="fab fa-facebook"></i>
+                        </div>
+                        <h5>Facebook</h5>
+                        <h3 class="mb-2">8.7K</h3>
+                        <span class="growth-indicator growth-positive">
+                            <i class="fas fa-arrow-up"></i> 1.5%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="platform-card card h-100">
+                    <div class="card-body text-center">
+                        <div class="platform-icon twitter">
+                            <i class="fab fa-twitter"></i>
+                        </div>
+                        <h5>Twitter</h5>
+                        <h3 class="mb-2">12.4K</h3>
+                        <span class="growth-indicator growth-negative">
+                            <i class="fas fa-arrow-down"></i> 0.8%
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="platform-card card h-100">
+                    <div class="card-body text-center">
+                        <div class="platform-icon linkedin">
+                            <i class="fab fa-linkedin"></i>
+                        </div>
+                        <h5>LinkedIn</h5>
+                        <h3 class="mb-2">5.9K</h3>
+                        <span class="growth-indicator growth-positive">
+                            <i class="fas fa-arrow-up"></i> 3.2%
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Growth Chart -->
+                <div class="card mb-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="card-title mb-0">Follower Growth Trends</h5>
+                        <div class="btn-group">
+                            <button class="btn btn-outline-secondary btn-sm" data-range="week">Week</button>
+                            <button class="btn btn-outline-secondary btn-sm active" data-range="month">Month</button>
+                            <button class="btn btn-outline-secondary btn-sm" data-range="year">Year</button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="growthChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Engagement Metrics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Engagement Metrics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="engagement-card border">
+                                    <div class="engagement-header">
+                                        <h6 class="mb-0">Instagram Engagement</h6>
+                                    </div>
+                                    <div class="engagement-body">
+                                        <div class="engagement-metric">
+                                            <div class="engagement-metric-icon">
+                                                <i class="fas fa-heart text-danger"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Likes</div>
+                                                <div class="text-muted">2.5K avg per post</div>
+                                            </div>
+                                        </div>
+                                        <div class="engagement-metric">
+                                            <div class="engagement-metric-icon">
+                                                <i class="fas fa-comment text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Comments</div>
+                                                <div class="text-muted">150 avg per post</div>
+                                            </div>
+                                        </div>
+                                        <div class="engagement-metric">
+                                            <div class="engagement-metric-icon">
+                                                <i class="fas fa-share text-success"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Shares</div>
+                                                <div class="text-muted">75 avg per post</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="engagement-card border">
+                                    <div class="engagement-header">
+                                        <h6 class="mb-0">Twitter Engagement</h6>
+                                    </div>
+                                    <div class="engagement-body">
+                                        <div class="engagement-metric">
+                                            <div class="engagement-metric-icon">
+                                                <i class="fas fa-heart text-danger"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Likes</div>
+                                                <div class="text-muted">1.2K avg per tweet</div>
+                                            </div>
+                                        </div>
+                                        <div class="engagement-metric">
+                                            <div class="engagement-metric-icon">
+                                                <i class="fas fa-retweet text-primary"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Retweets</div>
+                                                <div class="text-muted">250 avg per tweet</div>
+                                            </div>
+                                        </div>
+                                        <div class="engagement-metric">
+                                            <div class="engagement-metric-icon">
+                                                <i class="fas fa-reply text-success"></i>
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">Replies</div>
+                                                <div class="text-muted">100 avg per tweet</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Date Range Selection -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Date Range</h5>
+                    </div>
+                    <div class="card-body">
+                        <input type="text" class="form-control" id="dateRange">
+                    </div>
+                </div>
+
+                <!-- Growth Statistics -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Growth Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-card p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">Total Followers</h6>
+                                    <small class="text-muted">Across all platforms</small>
+                                </div>
+                                <h4 class="mb-0">42.2K</h4>
+                            </div>
+                        </div>
+                        <div class="stats-card p-3 mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">Monthly Growth</h6>
+                                    <small class="text-muted">Average increase</small>
+                                </div>
+                                <h4 class="text-success mb-0">+1.8K</h4>
+                            </div>
+                        </div>
+                        <div class="stats-card p-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">Engagement Rate</h6>
+                                    <small class="text-muted">Average across platforms</small>
+                                </div>
+                                <h4 class="mb-0">4.2%</h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Options -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Export Data</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="export-options">
+                            <button class="btn btn-outline-primary mb-2" id="exportCSV">
+                                <i class="fas fa-file-csv"></i> Export as CSV
+                            </button>
+                            <button class="btn btn-outline-primary mb-2" id="exportPDF">
+                                <i class="fas fa-file-pdf"></i> Export as PDF
+                            </button>
+                            <button class="btn btn-outline-primary" id="exportJSON">
+                                <i class="fas fa-file-code"></i> Export as JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>Created by Aqib Chaudhary | Multi-Tools Website</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <!-- Date Range Picker -->
+    <script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom JS -->
+    <script src="../../js/follower-tracker.js"></script>
+</body>
+</html> 

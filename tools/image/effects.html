@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Effects - Multi-Tools</title>
+    <meta name="description" content="Apply artistic effects and filters to images. Create stunning visual effects with our online tool.">
+    <meta name="keywords" content="image effects, photo filters, artistic effects, image editor">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .image-container {
+            max-height: 500px;
+            margin-bottom: 1rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        #previewCanvas {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 0.25rem;
+        }
+        .placeholder-upload {
+            border: 2px dashed #dee2e6;
+            border-radius: 0.25rem;
+            padding: 2rem;
+            text-align: center;
+            background-color: #f8f9fa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .placeholder-upload:hover {
+            border-color: #0d6efd;
+            background-color: #f1f8ff;
+        }
+        .placeholder-upload i {
+            font-size: 2rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+        .effects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .effect-item {
+            text-align: center;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            border: 1px solid #dee2e6;
+            transition: all 0.3s ease;
+        }
+        .effect-item:hover {
+            border-color: #0d6efd;
+            background-color: #f8f9fa;
+        }
+        .effect-item.active {
+            border-color: #0d6efd;
+            background-color: #e7f1ff;
+        }
+        .effect-preview {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 0.5rem;
+            border-radius: 0.25rem;
+            overflow: hidden;
+        }
+        .effect-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .effect-name {
+            font-size: 0.9rem;
+            margin: 0;
+        }
+        .controls-section {
+            margin-bottom: 1.5rem;
+        }
+        .controls-section h6 {
+            margin-bottom: 1rem;
+        }
+        .range-control {
+            margin-bottom: 1rem;
+        }
+        .range-control label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.25rem;
+        }
+        .range-control label span {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Effects</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4" id="uploadArea">
+                            <input type="file" id="imageInput" accept="image/*" class="d-none">
+                            <div class="placeholder-upload" onclick="document.getElementById('imageInput').click()">
+                                <i class="bi bi-image"></i>
+                                <h6>Upload Image</h6>
+                                <p class="text-muted small mb-0">Click to upload or drag & drop</p>
+                                <p class="text-muted small">Supports JPG, PNG, WebP (Max 10MB)</p>
+                            </div>
+                        </div>
+
+                        <!-- Editor Area -->
+                        <div class="d-none" id="editorArea">
+                            <!-- Image Preview -->
+                            <div class="image-container">
+                                <canvas id="previewCanvas"></canvas>
+                            </div>
+
+                            <!-- Effects Grid -->
+                            <div class="effects-grid" id="effectsGrid">
+                                <!-- Effects will be added dynamically -->
+                            </div>
+
+                            <!-- Effect Controls -->
+                            <div class="controls-section" id="effectControls">
+                                <h6 class="text-center">Effect Settings</h6>
+                                <div class="row g-3">
+                                    <!-- Basic Adjustments -->
+                                    <div class="col-md-6">
+                                        <div class="range-control">
+                                            <label>
+                                                Brightness
+                                                <span id="brightnessValue">0</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="brightness" 
+                                                   min="-100" max="100" value="0">
+                                        </div>
+                                        <div class="range-control">
+                                            <label>
+                                                Contrast
+                                                <span id="contrastValue">0</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="contrast" 
+                                                   min="-100" max="100" value="0">
+                                        </div>
+                                        <div class="range-control">
+                                            <label>
+                                                Saturation
+                                                <span id="saturationValue">0</span>
+                                            </label>
+                                            <input type="range" class="form-range" id="saturation" 
+                                                   min="-100" max="100" value="0">
+                                        </div>
+                                    </div>
+                                    <!-- Effect-specific Controls -->
+                                    <div class="col-md-6" id="specificControls">
+                                        <!-- Will be populated based on selected effect -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="text-center">
+                                <button class="btn btn-outline-secondary" onclick="resetEffects()">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                </button>
+                                <button class="btn btn-primary" onclick="applyEffects()">
+                                    <i class="bi bi-magic"></i> Apply Effects
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="downloadImage()">
+                                    <i class="bi bi-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Results</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Use high-quality images for best results</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Adjust basic settings before applying effects</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Combine multiple effects for unique looks</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Preview effects before applying them</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Variables
+        let originalImage = null;
+        let currentEffect = null;
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+
+        // Effects definitions
+        const effects = {
+            none: {
+                name: 'None',
+                preview: '/images/effects/none.jpg',
+                apply: (ctx, canvas) => ctx
+            },
+            grayscale: {
+                name: 'Grayscale',
+                preview: '/images/effects/grayscale.jpg',
+                apply: (ctx, canvas) => {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        const avg = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                        data[i] = data[i + 1] = data[i + 2] = avg;
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    return ctx;
+                }
+            },
+            sepia: {
+                name: 'Sepia',
+                preview: '/images/effects/sepia.jpg',
+                apply: (ctx, canvas) => {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+                        data[i] = (r * 0.393) + (g * 0.769) + (b * 0.189);
+                        data[i + 1] = (r * 0.349) + (g * 0.686) + (b * 0.168);
+                        data[i + 2] = (r * 0.272) + (g * 0.534) + (b * 0.131);
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    return ctx;
+                }
+            },
+            invert: {
+                name: 'Invert',
+                preview: '/images/effects/invert.jpg',
+                apply: (ctx, canvas) => {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        data[i] = 255 - data[i];
+                        data[i + 1] = 255 - data[i + 1];
+                        data[i + 2] = 255 - data[i + 2];
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    return ctx;
+                }
+            },
+            blur: {
+                name: 'Blur',
+                preview: '/images/effects/blur.jpg',
+                apply: (ctx, canvas) => {
+                    ctx.filter = 'blur(5px)';
+                    ctx.drawImage(canvas, 0, 0);
+                    ctx.filter = 'none';
+                    return ctx;
+                }
+            },
+            sharpen: {
+                name: 'Sharpen',
+                preview: '/images/effects/sharpen.jpg',
+                apply: (ctx, canvas) => {
+                    ctx.filter = 'contrast(1.4) sharpen(1)';
+                    ctx.drawImage(canvas, 0, 0);
+                    ctx.filter = 'none';
+                    return ctx;
+                }
+            },
+            vintage: {
+                name: 'Vintage',
+                preview: '/images/effects/vintage.jpg',
+                apply: (ctx, canvas) => {
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i];
+                        const g = data[i + 1];
+                        const b = data[i + 2];
+                        data[i] = r * 0.9 + 20;
+                        data[i + 1] = g * 0.7 + 20;
+                        data[i + 2] = b * 0.5 + 20;
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    return ctx;
+                }
+            },
+            vignette: {
+                name: 'Vignette',
+                preview: '/images/effects/vignette.jpg',
+                apply: (ctx, canvas) => {
+                    const gradient = ctx.createRadialGradient(
+                        canvas.width/2, canvas.height/2, 0,
+                        canvas.width/2, canvas.height/2, canvas.width/2
+                    );
+                    gradient.addColorStop(0, 'rgba(0,0,0,0)');
+                    gradient.addColorStop(1, 'rgba(0,0,0,0.5)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    return ctx;
+                }
+            },
+            pixelate: {
+                name: 'Pixelate',
+                preview: '/images/effects/pixelate.jpg',
+                apply: (ctx, canvas) => {
+                    const size = 10;
+                    const w = canvas.width;
+                    const h = canvas.height;
+                    
+                    for (let y = 0; y < h; y += size) {
+                        for (let x = 0; x < w; x += size) {
+                            const pixel = ctx.getImageData(x, y, 1, 1);
+                            ctx.fillStyle = `rgb(${pixel.data[0]},${pixel.data[1]},${pixel.data[2]})`;
+                            ctx.fillRect(x, y, size, size);
+                        }
+                    }
+                    return ctx;
+                }
+            }
+        };
+
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const editorArea = document.getElementById('editorArea');
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+        const effectsGrid = document.getElementById('effectsGrid');
+        const specificControls = document.getElementById('specificControls');
+
+        // Setup event listeners
+        imageInput.addEventListener('change', handleImageUpload);
+        document.querySelectorAll('.form-range').forEach(range => {
+            range.addEventListener('input', updateAdjustments);
+        });
+
+        // Initialize effects grid
+        function initializeEffectsGrid() {
+            Object.entries(effects).forEach(([key, effect]) => {
+                const div = document.createElement('div');
+                div.className = 'effect-item';
+                div.onclick = () => selectEffect(key);
+                div.innerHTML = `
+                    <div class="effect-preview">
+                        <img src="${effect.preview}" alt="${effect.name}">
+                    </div>
+                    <p class="effect-name">${effect.name}</p>
+                `;
+                effectsGrid.appendChild(div);
+            });
+        }
+
+        // Drag and drop
+        const placeholder = document.querySelector('.placeholder-upload');
+        placeholder.addEventListener('dragover', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#0d6efd';
+            placeholder.style.backgroundColor = '#f1f8ff';
+        });
+
+        placeholder.addEventListener('dragleave', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#dee2e6';
+            placeholder.style.backgroundColor = '#f8f9fa';
+        });
+
+        placeholder.addEventListener('drop', e => {
+            e.preventDefault();
+            e.stopPropagation();
+            placeholder.style.borderColor = '#dee2e6';
+            placeholder.style.backgroundColor = '#f8f9fa';
+            
+            const file = e.dataTransfer.files[0];
+            handleImageUpload({ target: { files: [file] } });
+        });
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            if (file.size > maxFileSize) {
+                alert('File is too large. Maximum size is 10MB.');
+                return;
+            }
+
+            if (!supportedFormats.includes(file.type)) {
+                alert('Unsupported file format. Please use JPG, PNG, or WebP.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                    uploadArea.classList.add('d-none');
+                    editorArea.classList.remove('d-none');
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function selectEffect(effectKey) {
+            currentEffect = effectKey;
+            document.querySelectorAll('.effect-item').forEach(item => {
+                item.classList.toggle('active', 
+                    item.querySelector('.effect-name').textContent === effects[effectKey].name);
+            });
+            updatePreview();
+        }
+
+        function updateAdjustments() {
+            document.getElementById('brightnessValue').textContent = 
+                document.getElementById('brightness').value;
+            document.getElementById('contrastValue').textContent = 
+                document.getElementById('contrast').value;
+            document.getElementById('saturationValue').textContent = 
+                document.getElementById('saturation').value;
+            updatePreview();
+        }
+
+        function updatePreview() {
+            if (!originalImage) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0);
+
+            // Apply basic adjustments
+            const brightness = parseInt(document.getElementById('brightness').value);
+            const contrast = parseInt(document.getElementById('contrast').value);
+            const saturation = parseInt(document.getElementById('saturation').value);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+
+            for (let i = 0; i < data.length; i += 4) {
+                // Brightness
+                data[i] += brightness;
+                data[i + 1] += brightness;
+                data[i + 2] += brightness;
+
+                // Contrast
+                const factor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+                data[i] = factor * (data[i] - 128) + 128;
+                data[i + 1] = factor * (data[i + 1] - 128) + 128;
+                data[i + 2] = factor * (data[i + 2] - 128) + 128;
+
+                // Saturation
+                const gray = (data[i] + data[i + 1] + data[i + 2]) / 3;
+                data[i] = gray + (data[i] - gray) * (1 + saturation/100);
+                data[i + 1] = gray + (data[i + 1] - gray) * (1 + saturation/100);
+                data[i + 2] = gray + (data[i + 2] - gray) * (1 + saturation/100);
+            }
+
+            ctx.putImageData(imageData, 0, 0);
+
+            // Apply selected effect
+            if (currentEffect && currentEffect !== 'none') {
+                effects[currentEffect].apply(ctx, canvas);
+            }
+        }
+
+        function resetEffects() {
+            if (!originalImage) return;
+
+            currentEffect = 'none';
+            document.getElementById('brightness').value = 0;
+            document.getElementById('contrast').value = 0;
+            document.getElementById('saturation').value = 0;
+            updateAdjustments();
+            
+            document.querySelectorAll('.effect-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0);
+        }
+
+        function applyEffects() {
+            if (!originalImage) return;
+            originalImage = canvas.toDataURL('image/png');
+            const img = new Image();
+            img.onload = function() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = originalImage;
+        }
+
+        function downloadImage() {
+            if (!originalImage) return;
+
+            const link = document.createElement('a');
+            link.download = 'edited-image.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Initialize effects grid
+        initializeEffectsGrid();
+    </script>
+</body>
+</html> 

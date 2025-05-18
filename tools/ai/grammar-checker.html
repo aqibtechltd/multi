@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Grammar Checker - Advanced Writing Assistant | Multi Tools</title>
+    <meta name="description" content="Advanced AI-powered grammar checker that corrects spelling, grammar, punctuation, and style. Improve your writing with real-time suggestions.">
+    <meta name="keywords" content="grammar checker, spelling checker, writing assistant, AI grammar tool, punctuation checker">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .editor-area {
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            resize: vertical;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .correction-card {
+            border-left: 3px solid var(--primary-color);
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+        }
+        .correction-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .suggestion {
+            cursor: pointer;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            background-color: #f8f9fa;
+            display: inline-block;
+            margin: 0.25rem;
+            transition: all 0.2s ease;
+        }
+        .suggestion:hover {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .error-highlight {
+            background-color: rgba(255, 0, 0, 0.1);
+            text-decoration: wavy underline rgba(255, 0, 0, 0.5);
+            cursor: pointer;
+        }
+        .warning-highlight {
+            background-color: rgba(255, 165, 0, 0.1);
+            text-decoration: wavy underline rgba(255, 165, 0, 0.5);
+            cursor: pointer;
+        }
+        .style-highlight {
+            background-color: rgba(0, 0, 255, 0.1);
+            text-decoration: wavy underline rgba(0, 0, 255, 0.5);
+            cursor: pointer;
+        }
+        .stats-card {
+            border: none;
+            background-color: #f8f9fa;
+            transition: all 0.2s ease;
+        }
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="mb-2">Checking your text</h5>
+            <p class="mb-0 text-muted" id="loadingStatus">Analyzing grammar and style...</p>
+        </div>
+    </div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">AI Grammar Checker</h1>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Text Editor -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <textarea class="form-control editor-area" id="textInput" 
+                                    placeholder="Enter or paste your text here for grammar checking..."></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button class="btn btn-primary" id="checkBtn">
+                                    <i class="bi bi-check-circle"></i> Check Grammar
+                                </button>
+                                <button class="btn btn-outline-secondary" id="clearBtn">
+                                    <i class="bi bi-x-lg"></i> Clear
+                                </button>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-primary" id="copyBtn" data-bs-toggle="tooltip" title="Copy text">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" id="downloadBtn" data-bs-toggle="tooltip" title="Download text">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Writing Statistics -->
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Words</h6>
+                                <p class="h4 mb-0" id="wordCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Characters</h6>
+                                <p class="h4 mb-0" id="charCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Sentences</h6>
+                                <p class="h4 mb-0" id="sentenceCount">0</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="card stats-card">
+                            <div class="card-body text-center">
+                                <h6 class="card-title">Score</h6>
+                                <p class="h4 mb-0" id="readabilityScore">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Corrections and Suggestions -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Suggestions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="suggestionsContainer">
+                            <!-- Suggestions will be added here dynamically -->
+                            <p class="text-muted text-center mb-0">Click "Check Grammar" to see suggestions</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Settings -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Check Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Writing Style</label>
+                            <select class="form-select" id="writingStyle">
+                                <option value="general">General</option>
+                                <option value="academic">Academic</option>
+                                <option value="business">Business</option>
+                                <option value="technical">Technical</option>
+                                <option value="creative">Creative</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Language Variety</label>
+                            <select class="form-select" id="languageVariety">
+                                <option value="en-US">English (US)</option>
+                                <option value="en-GB">English (UK)</option>
+                                <option value="en-AU">English (Australia)</option>
+                                <option value="en-CA">English (Canada)</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Check Types</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="checkGrammar" checked>
+                                <label class="form-check-label" for="checkGrammar">
+                                    Grammar
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="checkSpelling" checked>
+                                <label class="form-check-label" for="checkSpelling">
+                                    Spelling
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="checkPunctuation" checked>
+                                <label class="form-check-label" for="checkPunctuation">
+                                    Punctuation
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="checkStyle" checked>
+                                <label class="form-check-label" for="checkStyle">
+                                    Style Suggestions
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Writing Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <h6><i class="bi bi-lightbulb text-warning"></i> Common Issues</h6>
+                                <ul class="list-unstyled">
+                                    <li><small>• Subject-verb agreement</small></li>
+                                    <li><small>• Article usage (a/an/the)</small></li>
+                                    <li><small>• Comma splices</small></li>
+                                    <li><small>• Run-on sentences</small></li>
+                                </ul>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-gear text-primary"></i> Features</h6>
+                                <ul class="list-unstyled">
+                                    <li><small>• Real-time checking</small></li>
+                                    <li><small>• Context-aware suggestions</small></li>
+                                    <li><small>• Style improvements</small></li>
+                                    <li><small>• Readability scoring</small></li>
+                                </ul>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-link text-success"></i> Related Tools</h6>
+                                <ul class="list-unstyled">
+                                    <li><small>• <a href="paraphraser.html">Paraphrasing Tool</a></small></li>
+                                    <li><small>• <a href="text-generator.html">Text Generator</a></small></li>
+                                    <li><small>• <a href="summarizer.html">Text Summarizer</a></small></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../js/grammar-checker.js"></script>
+</body>
+</html> 

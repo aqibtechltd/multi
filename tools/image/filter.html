@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Filter - Multi-Tools</title>
+    <meta name="description" content="Apply beautiful filters to your images. Adjust brightness, contrast, saturation, and more. Free online image filter tool.">
+    <meta name="keywords" content="image filter, photo effects, image editor, photo filters">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .image-container {
+            max-height: 500px;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+        #previewImage {
+            max-width: 100%;
+            max-height: 500px;
+            border-radius: 0.25rem;
+        }
+        .filter-preview {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .filter-preview:hover {
+            transform: scale(1.05);
+        }
+        .filter-option {
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .filter-name {
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+            margin-bottom: 0;
+        }
+        .slider-container {
+            padding: 0.5rem 1rem;
+        }
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.25rem;
+        }
+        .slider-value {
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+        .filter-active {
+            border: 2px solid #0d6efd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Filter</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4 text-center" id="uploadArea">
+                            <input type="file" id="imageInput" accept="image/*" class="d-none">
+                            <button class="btn btn-primary" onclick="document.getElementById('imageInput').click()">
+                                <i class="bi bi-upload"></i> Upload Image
+                            </button>
+                            <p class="text-muted small mt-2">Supports JPG, PNG, WebP (Max 10MB)</p>
+                        </div>
+
+                        <!-- Editor Area -->
+                        <div class="d-none" id="editorArea">
+                            <!-- Image Preview -->
+                            <div class="image-container mb-4">
+                                <canvas id="previewCanvas"></canvas>
+                            </div>
+
+                            <!-- Filter Controls -->
+                            <div class="mb-4">
+                                <h5 class="mb-3">Preset Filters</h5>
+                                <div class="row g-3" id="filterPresets">
+                                    <!-- Filter options will be added here -->
+                                </div>
+                            </div>
+
+                            <!-- Adjustment Controls -->
+                            <div class="mb-4">
+                                <h5 class="mb-3">Adjustments</h5>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <div class="slider-container">
+                                            <div class="slider-label">
+                                                <span>Brightness</span>
+                                                <span class="slider-value" id="brightnessValue">0</span>
+                                            </div>
+                                            <input type="range" class="form-range" id="brightness" min="-100" max="100" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="slider-container">
+                                            <div class="slider-label">
+                                                <span>Contrast</span>
+                                                <span class="slider-value" id="contrastValue">0</span>
+                                            </div>
+                                            <input type="range" class="form-range" id="contrast" min="-100" max="100" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="slider-container">
+                                            <div class="slider-label">
+                                                <span>Saturation</span>
+                                                <span class="slider-value" id="saturationValue">0</span>
+                                            </div>
+                                            <input type="range" class="form-range" id="saturation" min="-100" max="100" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="slider-container">
+                                            <div class="slider-label">
+                                                <span>Temperature</span>
+                                                <span class="slider-value" id="temperatureValue">0</span>
+                                            </div>
+                                            <input type="range" class="form-range" id="temperature" min="-100" max="100" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="slider-container">
+                                            <div class="slider-label">
+                                                <span>Blur</span>
+                                                <span class="slider-value" id="blurValue">0</span>
+                                            </div>
+                                            <input type="range" class="form-range" id="blur" min="0" max="20" value="0">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="slider-container">
+                                            <div class="slider-label">
+                                                <span>Vignette</span>
+                                                <span class="slider-value" id="vignetteValue">0</span>
+                                            </div>
+                                            <input type="range" class="form-range" id="vignette" min="0" max="100" value="0">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="text-center">
+                                <button class="btn btn-outline-secondary me-2" onclick="resetFilters()">
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                </button>
+                                <button class="btn btn-primary" onclick="saveImage()">
+                                    <i class="bi bi-download"></i> Save Image
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Results</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Try preset filters for quick enhancements</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Fine-tune with adjustment sliders</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Combine multiple adjustments for unique looks</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Use vignette to draw focus to the center</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Variables
+        let originalImage = null;
+        let currentFilter = 'none';
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const uploadArea = document.getElementById('uploadArea');
+        const editorArea = document.getElementById('editorArea');
+        const canvas = document.getElementById('previewCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Filters configuration
+        const filters = {
+            none: { name: 'Normal', adjustments: {} },
+            vintage: {
+                name: 'Vintage',
+                adjustments: {
+                    brightness: -10,
+                    contrast: 10,
+                    saturation: -20,
+                    temperature: 10,
+                    vignette: 30
+                }
+            },
+            blackAndWhite: {
+                name: 'B&W',
+                adjustments: {
+                    saturation: -100,
+                    contrast: 20,
+                    brightness: 10
+                }
+            },
+            warm: {
+                name: 'Warm',
+                adjustments: {
+                    temperature: 30,
+                    saturation: 10,
+                    brightness: 5
+                }
+            },
+            cool: {
+                name: 'Cool',
+                adjustments: {
+                    temperature: -30,
+                    saturation: 10,
+                    brightness: 5
+                }
+            },
+            dramatic: {
+                name: 'Dramatic',
+                adjustments: {
+                    contrast: 40,
+                    saturation: 20,
+                    vignette: 50
+                }
+            },
+            fade: {
+                name: 'Fade',
+                adjustments: {
+                    brightness: 10,
+                    contrast: -10,
+                    saturation: -20
+                }
+            }
+        };
+
+        // Setup event listeners
+        imageInput.addEventListener('change', handleImageUpload);
+        document.querySelectorAll('input[type="range"]').forEach(slider => {
+            slider.addEventListener('input', updateFilter);
+        });
+
+        // Initialize filter presets
+        function initializeFilterPresets() {
+            const container = document.getElementById('filterPresets');
+            Object.entries(filters).forEach(([key, filter]) => {
+                const col = document.createElement('div');
+                col.className = 'col-4 col-md-2';
+                col.innerHTML = `
+                    <div class="filter-option">
+                        <canvas class="filter-preview" data-filter="${key}"></canvas>
+                        <p class="filter-name">${filter.name}</p>
+                    </div>
+                `;
+                container.appendChild(col);
+            });
+        }
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            if (file.size > maxFileSize) {
+                alert('File is too large. Maximum size is 10MB.');
+                return;
+            }
+
+            if (!supportedFormats.includes(file.type)) {
+                alert('Unsupported file format. Please use JPG, PNG, or WebP.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = new Image();
+                img.onload = function() {
+                    originalImage = img;
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    resetFilters();
+                    uploadArea.classList.add('d-none');
+                    editorArea.classList.remove('d-none');
+                    updateFilterPreviews();
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function updateFilterPreviews() {
+            document.querySelectorAll('.filter-preview').forEach(preview => {
+                const filterName = preview.dataset.filter;
+                const previewCtx = preview.getContext('2d');
+                preview.width = 100;
+                preview.height = 100;
+
+                // Draw scaled version of image
+                const scale = Math.min(preview.width / originalImage.width, preview.height / originalImage.height);
+                const width = originalImage.width * scale;
+                const height = originalImage.height * scale;
+                const x = (preview.width - width) / 2;
+                const y = (preview.height - height) / 2;
+
+                previewCtx.drawImage(originalImage, x, y, width, height);
+                applyFilterToCanvas(previewCtx, filters[filterName].adjustments);
+
+                preview.onclick = () => {
+                    currentFilter = filterName;
+                    applyPresetFilter(filterName);
+                    document.querySelectorAll('.filter-preview').forEach(p => 
+                        p.classList.toggle('filter-active', p === preview));
+                };
+            });
+        }
+
+        function applyPresetFilter(filterName) {
+            const filter = filters[filterName];
+            Object.entries(filter.adjustments).forEach(([adjustment, value]) => {
+                document.getElementById(adjustment).value = value;
+                document.getElementById(adjustment + 'Value').textContent = value;
+            });
+            updateFilter();
+        }
+
+        function updateFilter() {
+            if (!originalImage) return;
+
+            const brightness = parseInt(document.getElementById('brightness').value);
+            const contrast = parseInt(document.getElementById('contrast').value);
+            const saturation = parseInt(document.getElementById('saturation').value);
+            const temperature = parseInt(document.getElementById('temperature').value);
+            const blur = parseInt(document.getElementById('blur').value);
+            const vignette = parseInt(document.getElementById('vignette').value);
+
+            // Update value displays
+            document.getElementById('brightnessValue').textContent = brightness;
+            document.getElementById('contrastValue').textContent = contrast;
+            document.getElementById('saturationValue').textContent = saturation;
+            document.getElementById('temperatureValue').textContent = temperature;
+            document.getElementById('blurValue').textContent = blur;
+            document.getElementById('vignetteValue').textContent = vignette;
+
+            // Clear canvas and draw original image
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(originalImage, 0, 0);
+
+            // Apply filters
+            applyFilterToCanvas(ctx, {
+                brightness,
+                contrast,
+                saturation,
+                temperature,
+                blur,
+                vignette
+            });
+        }
+
+        function applyFilterToCanvas(context, adjustments) {
+            const {
+                brightness = 0,
+                contrast = 0,
+                saturation = 0,
+                temperature = 0,
+                blur = 0,
+                vignette = 0
+            } = adjustments;
+
+            // Apply filters using CSS filters
+            const filters = [];
+            if (brightness !== 0) filters.push(`brightness(${1 + brightness/100})`);
+            if (contrast !== 0) filters.push(`contrast(${1 + contrast/100})`);
+            if (saturation !== 0) filters.push(`saturate(${1 + saturation/100})`);
+            if (blur !== 0) filters.push(`blur(${blur}px)`);
+
+            context.filter = filters.join(' ');
+            context.drawImage(originalImage, 0, 0);
+            context.filter = 'none';
+
+            // Apply temperature (color balance)
+            if (temperature !== 0) {
+                const imageData = context.getImageData(0, 0, context.canvas.width, context.canvas.height);
+                const data = imageData.data;
+                for (let i = 0; i < data.length; i += 4) {
+                    data[i] += temperature; // Red
+                    data[i + 2] -= temperature; // Blue
+                }
+                context.putImageData(imageData, 0, 0);
+            }
+
+            // Apply vignette
+            if (vignette > 0) {
+                const gradient = context.createRadialGradient(
+                    context.canvas.width/2, context.canvas.height/2, 0,
+                    context.canvas.width/2, context.canvas.height/2,
+                    Math.max(context.canvas.width/2, context.canvas.height/2)
+                );
+                gradient.addColorStop(0, 'rgba(0,0,0,0)');
+                gradient.addColorStop(0.5, 'rgba(0,0,0,0)');
+                gradient.addColorStop(1, `rgba(0,0,0,${vignette/100})`);
+                
+                context.fillStyle = gradient;
+                context.fillRect(0, 0, context.canvas.width, context.canvas.height);
+            }
+        }
+
+        function resetFilters() {
+            currentFilter = 'none';
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                slider.value = slider.id === 'blur' || slider.id === 'vignette' ? 0 : 0;
+                document.getElementById(slider.id + 'Value').textContent = 0;
+            });
+            document.querySelectorAll('.filter-preview').forEach(preview => 
+                preview.classList.remove('filter-active'));
+            updateFilter();
+        }
+
+        function saveImage() {
+            const link = document.createElement('a');
+            link.download = 'filtered-image.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // Initialize filter presets
+        initializeFilterPresets();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Engagement Calculator | Multi Tools</title>
+    <meta name="description" content="Calculate and analyze social media engagement rates, predict post performance, and get insights for improvement.">
+    <meta name="keywords" content="social media engagement, engagement rate calculator, social media analytics, engagement metrics">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.css">
+    <style>
+        .metric-card {
+            border-radius: 1rem;
+            transition: transform 0.3s ease;
+        }
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+        .engagement-chart {
+            height: 300px;
+        }
+        .platform-icon {
+            font-size: 1.5rem;
+            margin-right: 0.5rem;
+        }
+        .benchmark-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.5rem;
+        }
+        .benchmark-good {
+            background-color: var(--bs-success);
+        }
+        .benchmark-average {
+            background-color: var(--bs-warning);
+        }
+        .benchmark-poor {
+            background-color: var(--bs-danger);
+        }
+        .tip-card {
+            border-left: 4px solid var(--bs-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">Social Media Engagement Calculator</h1>
+
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Input Form -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Calculate Engagement Rate</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="engagementForm">
+                            <!-- Platform Selection -->
+                            <div class="mb-4">
+                                <label class="form-label">Select Platform</label>
+                                <div class="btn-group w-100">
+                                    <input type="radio" class="btn-check" name="platform" id="instagram" checked>
+                                    <label class="btn btn-outline-primary" for="instagram">
+                                        <i class="bi bi-instagram"></i> Instagram
+                                    </label>
+                                    <input type="radio" class="btn-check" name="platform" id="facebook">
+                                    <label class="btn btn-outline-primary" for="facebook">
+                                        <i class="bi bi-facebook"></i> Facebook
+                                    </label>
+                                    <input type="radio" class="btn-check" name="platform" id="twitter">
+                                    <label class="btn btn-outline-primary" for="twitter">
+                                        <i class="bi bi-twitter-x"></i> Twitter
+                                    </label>
+                                    <input type="radio" class="btn-check" name="platform" id="linkedin">
+                                    <label class="btn btn-outline-primary" for="linkedin">
+                                        <i class="bi bi-linkedin"></i> LinkedIn
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Metrics Input -->
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Followers/Subscribers</label>
+                                    <input type="number" class="form-control" id="followers" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Post Reach</label>
+                                    <input type="number" class="form-control" id="reach" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Likes</label>
+                                    <input type="number" class="form-control" id="likes" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Comments</label>
+                                    <input type="number" class="form-control" id="comments" required>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Shares</label>
+                                    <input type="number" class="form-control" id="shares" required>
+                                </div>
+                            </div>
+
+                            <!-- Additional Metrics -->
+                            <div class="row g-3 mt-2">
+                                <div class="col-md-6">
+                                    <label class="form-label">Saves (Instagram)</label>
+                                    <input type="number" class="form-control" id="saves">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Profile Visits</label>
+                                    <input type="number" class="form-control" id="profileVisits">
+                                </div>
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary">
+                                    Calculate Engagement
+                                </button>
+                                <button type="reset" class="btn btn-outline-secondary">
+                                    Reset
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Results -->
+                <div class="card mb-4" id="resultsCard" style="display: none;">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Engagement Analysis</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Metrics Overview -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <div class="card metric-card bg-primary text-white">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2">Engagement Rate</h6>
+                                        <h3 class="card-title mb-0" id="engagementRate">0%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card metric-card bg-success text-white">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2">Reach Rate</h6>
+                                        <h3 class="card-title mb-0" id="reachRate">0%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card metric-card bg-info text-white">
+                                    <div class="card-body">
+                                        <h6 class="card-subtitle mb-2">Interaction Rate</h6>
+                                        <h3 class="card-title mb-0" id="interactionRate">0%</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Engagement Chart -->
+                        <div class="engagement-chart mb-4">
+                            <canvas id="engagementChart"></canvas>
+                        </div>
+
+                        <!-- Benchmarks -->
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h6 class="card-title">Industry Benchmarks</h6>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span>Your Engagement Rate</span>
+                                    <div>
+                                        <span class="benchmark-indicator" id="benchmarkIndicator"></span>
+                                        <span id="benchmarkText">Loading...</span>
+                                    </div>
+                                </div>
+                                <div class="progress">
+                                    <div class="progress-bar" id="benchmarkProgress" role="progressbar" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recommendations -->
+                        <div class="recommendations mt-4">
+                            <h6>Recommendations for Improvement</h6>
+                            <div id="recommendationsList">
+                                <!-- Recommendations will be added dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Tips and Best Practices -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Tips & Best Practices</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="tip-card p-3 mb-3">
+                            <h6>Optimal Posting Times</h6>
+                            <p class="small mb-0">Post when your audience is most active to maximize engagement.</p>
+                        </div>
+                        <div class="tip-card p-3 mb-3">
+                            <h6>Content Mix</h6>
+                            <p class="small mb-0">Maintain a balanced mix of educational, entertaining, and promotional content.</p>
+                        </div>
+                        <div class="tip-card p-3 mb-3">
+                            <h6>Hashtag Strategy</h6>
+                            <p class="small mb-0">Use relevant hashtags to increase post visibility and reach.</p>
+                        </div>
+                        <div class="tip-card p-3">
+                            <h6>Community Engagement</h6>
+                            <p class="small mb-0">Respond to comments and engage with your audience regularly.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Engagement Formulas -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Engagement Formulas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>Engagement Rate</h6>
+                            <code>(Likes + Comments + Shares) / Followers × 100</code>
+                        </div>
+                        <div class="mb-3">
+                            <h6>Reach Rate</h6>
+                            <code>Post Reach / Followers × 100</code>
+                        </div>
+                        <div>
+                            <h6>Interaction Rate</h6>
+                            <code>(Likes + Comments) / Post Reach × 100</code>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.0/dist/chart.min.js"></script>
+    <script src="../../js/engagement-calculator.js"></script>
+</body>
+</html> 

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Content Rewriter - Smart Text Rewriting | Multi Tools</title>
+    <meta name="description" content="Rewrite and rephrase your content with advanced AI. Generate unique variations while maintaining meaning and improving quality.">
+    <meta name="keywords" content="content rewriter, text rewriting, article spinner, content rephrasing, AI writing">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .text-area {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            resize: vertical;
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .rewrite-card {
+            transition: all 0.3s ease;
+            border-radius: 0.5rem;
+        }
+        .rewrite-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .variation-card {
+            border-left: 3px solid var(--primary-color);
+            margin-bottom: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .variation-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .quality-score {
+            font-size: 2rem;
+            font-weight: bold;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        .quality-label {
+            font-size: 1.25rem;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        .progress {
+            height: 1.5rem;
+            border-radius: 1rem;
+            margin: 0.5rem 0;
+        }
+        .progress-label {
+            font-size: 0.875rem;
+            margin-bottom: 0.25rem;
+        }
+        .comparison-view {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        .comparison-column {
+            flex: 1;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            background-color: var(--light-color);
+        }
+        .diff-highlight {
+            background-color: rgba(var(--primary-rgb), 0.1);
+            padding: 0.125rem 0.25rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="text-center">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="mb-2">Rewriting Content</h5>
+            <p class="mb-0 text-muted" id="loadingStatus">Generating variations...</p>
+        </div>
+    </div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">AI Content Rewriter</h1>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Text Input -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <textarea class="form-control text-area" id="textInput" 
+                                    placeholder="Enter or paste your content here for rewriting..."></textarea>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button class="btn btn-primary" id="rewriteBtn">
+                                    <i class="bi bi-pencil-square"></i> Rewrite Content
+                                </button>
+                                <button class="btn btn-outline-secondary" id="clearBtn">
+                                    <i class="bi bi-x-lg"></i> Clear
+                                </button>
+                            </div>
+                            <div>
+                                <button class="btn btn-outline-primary" id="copyBtn" data-bs-toggle="tooltip" title="Copy text">
+                                    <i class="bi bi-clipboard"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" id="downloadBtn" data-bs-toggle="tooltip" title="Download results">
+                                    <i class="bi bi-download"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Rewrite Results -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Rewritten Content</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="rewrite-card bg-light p-4">
+                                    <div class="quality-score" id="qualityScore">0%</div>
+                                    <div class="quality-label" id="qualityLabel">Content Quality</div>
+                                    <div class="progress-label">Uniqueness</div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" id="uniquenessProgress" 
+                                             role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="progress-label">Readability</div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-info" id="readabilityProgress" 
+                                             role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                    <div class="progress-label">Coherence</div>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-primary" id="coherenceProgress" 
+                                             role="progressbar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="comparison-view">
+                                    <div class="comparison-column">
+                                        <h6 class="mb-3">Original</h6>
+                                        <div id="originalText" class="small"></div>
+                                    </div>
+                                    <div class="comparison-column">
+                                        <h6 class="mb-3">Rewritten</h6>
+                                        <div id="rewrittenText" class="small"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-4">
+                            <h6>Alternative Variations</h6>
+                            <div id="variationsContainer">
+                                <!-- Variations will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Rewrite Settings -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Rewrite Settings</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Writing Style</label>
+                            <select class="form-select" id="writingStyle">
+                                <option value="general">General</option>
+                                <option value="professional">Professional</option>
+                                <option value="casual">Casual</option>
+                                <option value="academic">Academic</option>
+                                <option value="creative">Creative</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Tone</label>
+                            <select class="form-select" id="tone">
+                                <option value="neutral">Neutral</option>
+                                <option value="formal">Formal</option>
+                                <option value="friendly">Friendly</option>
+                                <option value="persuasive">Persuasive</option>
+                                <option value="enthusiastic">Enthusiastic</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Number of Variations</label>
+                            <input type="range" class="form-range" id="variationCount" min="1" max="5" value="3">
+                            <small class="text-muted" id="variationCountValue">3 variations</small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Advanced Options</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="keepKeywords" checked>
+                                <label class="form-check-label" for="keepKeywords">
+                                    Preserve Key Terms
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enhanceClarity" checked>
+                                <label class="form-check-label" for="enhanceClarity">
+                                    Enhance Clarity
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="improveFlow">
+                                <label class="form-check-label" for="improveFlow">
+                                    Improve Flow
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Rewriting Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-4">
+                            <div class="col-12">
+                                <h6><i class="bi bi-lightbulb text-warning"></i> Best Practices</h6>
+                                <ul class="list-unstyled">
+                                    <li><small>• Use complete sentences</small></li>
+                                    <li><small>• Maintain context</small></li>
+                                    <li><small>• Check final output</small></li>
+                                </ul>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-gear text-primary"></i> Features</h6>
+                                <ul class="list-unstyled">
+                                    <li><small>• Multiple variations</small></li>
+                                    <li><small>• Quality scoring</small></li>
+                                    <li><small>• Style customization</small></li>
+                                </ul>
+                            </div>
+                            <div class="col-12">
+                                <h6><i class="bi bi-link text-success"></i> Related Tools</h6>
+                                <ul class="list-unstyled">
+                                    <li><small>• <a href="paraphraser.html">Paraphrasing Tool</a></small></li>
+                                    <li><small>• <a href="text-generator.html">Text Generator</a></small></li>
+                                    <li><small>• <a href="grammar-checker.html">Grammar Checker</a></small></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Bootstrap JS and Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <!-- Custom JS -->
+    <script src="../../js/content-rewriter.js"></script>
+</body>
+</html> 

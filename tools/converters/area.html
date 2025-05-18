@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Area Converter - Multi-Tools</title>
+    <meta name="description" content="Convert between different area units including square meters, square feet, acres, hectares, and more. Built by Aqib Chaudhary.">
+    <meta name="keywords" content="area converter, square meter converter, square feet converter, acre converter, hectare converter">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <div class="row">
+            <!-- Tool Content -->
+            <div class="col-lg-8">
+                <h1 class="mb-4">Area Converter</h1>
+                <p class="lead mb-4">Convert between different units of area measurement instantly.</p>
+
+                <!-- Tool Interface -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fromValue" class="form-label">From</label>
+                                <input type="number" class="form-control mb-2" id="fromValue" placeholder="Enter value">
+                                <select class="form-select" id="fromUnit">
+                                    <option value="m2">Square Meters (m²)</option>
+                                    <option value="km2">Square Kilometers (km²)</option>
+                                    <option value="cm2">Square Centimeters (cm²)</option>
+                                    <option value="mm2">Square Millimeters (mm²)</option>
+                                    <option value="ha">Hectares (ha)</option>
+                                    <option value="ac">Acres (ac)</option>
+                                    <option value="ft2">Square Feet (ft²)</option>
+                                    <option value="in2">Square Inches (in²)</option>
+                                    <option value="yd2">Square Yards (yd²)</option>
+                                    <option value="mi2">Square Miles (mi²)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="toValue" class="form-label">To</label>
+                                <input type="number" class="form-control mb-2" id="toValue" readonly>
+                                <select class="form-select" id="toUnit">
+                                    <option value="ft2">Square Feet (ft²)</option>
+                                    <option value="m2">Square Meters (m²)</option>
+                                    <option value="km2">Square Kilometers (km²)</option>
+                                    <option value="cm2">Square Centimeters (cm²)</option>
+                                    <option value="mm2">Square Millimeters (mm²)</option>
+                                    <option value="ha">Hectares (ha)</option>
+                                    <option value="ac">Acres (ac)</option>
+                                    <option value="in2">Square Inches (in²)</option>
+                                    <option value="yd2">Square Yards (yd²)</option>
+                                    <option value="mi2">Square Miles (mi²)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="text-center mt-3">
+                            <button class="btn btn-primary" onclick="convert()">Convert</button>
+                            <button class="btn btn-secondary" onclick="swapUnits()">Swap Units</button>
+                            <button class="btn btn-danger" onclick="clearValues()">Clear</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Common Conversions -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Common Conversions</h5>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>From</th>
+                                        <th>To</th>
+                                        <th>Multiply by</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Square Meters</td>
+                                        <td>Square Feet</td>
+                                        <td>10.7639</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Acres</td>
+                                        <td>Square Meters</td>
+                                        <td>4046.86</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Hectares</td>
+                                        <td>Acres</td>
+                                        <td>2.47105</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Square Kilometers</td>
+                                        <td>Square Miles</td>
+                                        <td>0.386102</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Ad Space -->
+                <div class="ad-container mb-4">
+                    <div class="ad-placeholder bg-light p-3 text-center">
+                        Advertisement
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips</h5>
+                        <ul class="list-unstyled">
+                            <li><i class="bi bi-info-circle text-info"></i> Use decimals for precise area conversions</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Results are rounded to 6 decimal places</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Common in US: square feet and acres</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Common in agriculture: hectares</li>
+                            <li><i class="bi bi-info-circle text-info"></i> Metric system: square meters and hectares</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Related Tools -->
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Related Tools</h5>
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item"><a href="/tools/converters/length.html">Length Converter</a></li>
+                            <li class="list-group-item"><a href="/tools/converters/volume.html">Volume Converter</a></li>
+                            <li class="list-group-item"><a href="/tools/converters/perimeter.html">Perimeter Calculator</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        // Conversion rates to square meters (base unit)
+        const conversionRates = {
+            mm2: 0.000001,
+            cm2: 0.0001,
+            m2: 1,
+            km2: 1000000,
+            ha: 10000,
+            in2: 0.00064516,
+            ft2: 0.092903,
+            yd2: 0.836127,
+            ac: 4046.86,
+            mi2: 2589988.11
+        };
+
+        function convert() {
+            const fromValue = parseFloat(document.getElementById('fromValue').value);
+            const fromUnit = document.getElementById('fromUnit').value;
+            const toUnit = document.getElementById('toUnit').value;
+
+            if (isNaN(fromValue)) {
+                document.getElementById('toValue').value = '';
+                return;
+            }
+
+            // Convert to square meters first (base unit)
+            const squareMeters = fromValue * conversionRates[fromUnit];
+            
+            // Convert from square meters to target unit
+            const result = squareMeters / conversionRates[toUnit];
+            
+            document.getElementById('toValue').value = result.toFixed(6);
+        }
+
+        function swapUnits() {
+            const fromUnit = document.getElementById('fromUnit');
+            const toUnit = document.getElementById('toUnit');
+            const fromValue = document.getElementById('fromValue');
+            const toValue = document.getElementById('toValue');
+
+            // Swap unit selections
+            const temp = fromUnit.value;
+            fromUnit.value = toUnit.value;
+            toUnit.value = temp;
+
+            // Swap values if both exist
+            if (fromValue.value && toValue.value) {
+                const tempVal = fromValue.value;
+                fromValue.value = toValue.value;
+                toValue.value = tempVal;
+            }
+        }
+
+        function clearValues() {
+            document.getElementById('fromValue').value = '';
+            document.getElementById('toValue').value = '';
+        }
+
+        // Auto-convert when input value changes or units change
+        document.getElementById('fromValue').addEventListener('input', convert);
+        document.getElementById('fromUnit').addEventListener('change', convert);
+        document.getElementById('toUnit').addEventListener('change', convert);
+    </script>
+</body>
+</html> 

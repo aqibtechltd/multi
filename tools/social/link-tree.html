@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Media Link Tree Creator | Multi-Tools Website</title>
+    <meta name="description" content="Create a customized landing page for all your social media links with analytics tracking and beautiful themes.">
+    <meta name="keywords" content="link tree, social media links, bio link, landing page creator">
+    <meta name="author" content="Aqib Chaudhary">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="../../css/style.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+    <style>
+        .theme-preview {
+            width: 100%;
+            height: 150px;
+            border-radius: 1rem;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        .theme-preview:hover {
+            transform: translateY(-5px);
+        }
+        .theme-preview.active {
+            border: 3px solid var(--bs-primary);
+        }
+        .link-card {
+            border-radius: 1rem;
+            transition: all 0.3s ease;
+        }
+        .link-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .link-handle {
+            cursor: move;
+            padding: 0.5rem;
+        }
+        .preview-frame {
+            width: 100%;
+            max-width: 375px;
+            height: 667px;
+            border: 12px solid #000;
+            border-radius: 2rem;
+            margin: 0 auto;
+            background: white;
+            overflow-y: auto;
+        }
+        .preview-content {
+            padding: 2rem 1rem;
+        }
+        .preview-link {
+            display: block;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+        .preview-link:hover {
+            transform: translateY(-2px);
+        }
+        .qr-code {
+            max-width: 200px;
+            margin: 0 auto;
+        }
+        .analytics-card {
+            border-radius: 1rem;
+            background: linear-gradient(45deg, var(--bs-primary), var(--bs-info));
+            color: white;
+        }
+        .color-picker {
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="../../index.html">Multi-Tools</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link" href="../../index.html">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#">Social Media Tools</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container my-5">
+        <h1 class="text-center mb-4">Social Media Link Tree Creator</h1>
+        
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Link Tree Editor -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Link Tree Editor</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="linkTreeForm">
+                            <!-- Profile Info -->
+                            <div class="mb-4">
+                                <label class="form-label">Profile Information</label>
+                                <input type="text" class="form-control mb-2" id="profileName" placeholder="Your Name or Brand">
+                                <textarea class="form-control" id="profileBio" rows="2" placeholder="Short bio or description"></textarea>
+                            </div>
+
+                            <!-- Theme Selection -->
+                            <div class="mb-4">
+                                <label class="form-label">Select Theme</label>
+                                <div class="row g-3">
+                                    <div class="col-4">
+                                        <div class="theme-preview active" style="background: linear-gradient(45deg, #6366f1, #a855f7)" data-theme="gradient" onclick="selectTheme('gradient')"></div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="theme-preview" style="background: #000000" data-theme="dark" onclick="selectTheme('dark')"></div>
+                                    </div>
+                                    <div class="col-4">
+                                        <div class="theme-preview" style="background: #ffffff; border: 1px solid #dee2e6" data-theme="light" onclick="selectTheme('light')"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Color Customization -->
+                            <div class="mb-4">
+                                <label class="form-label">Customize Colors</label>
+                                <div class="d-flex gap-3">
+                                    <div>
+                                        <small class="d-block mb-1">Background</small>
+                                        <input type="color" class="color-picker" id="bgColor" value="#ffffff">
+                                    </div>
+                                    <div>
+                                        <small class="d-block mb-1">Text</small>
+                                        <input type="color" class="color-picker" id="textColor" value="#000000">
+                                    </div>
+                                    <div>
+                                        <small class="d-block mb-1">Button</small>
+                                        <input type="color" class="color-picker" id="buttonColor" value="#6366f1">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Links -->
+                            <div class="mb-4">
+                                <label class="form-label">Your Links</label>
+                                <div id="linksList">
+                                    <!-- Links will be added here -->
+                                </div>
+                                <button type="button" class="btn btn-outline-primary mt-2" onclick="addLink()">
+                                    <i class="fas fa-plus"></i> Add Link
+                                </button>
+                            </div>
+
+                            <!-- Social Icons -->
+                            <div class="mb-4">
+                                <label class="form-label">Social Media Icons</label>
+                                <div class="row g-3" id="socialIcons">
+                                    <div class="col-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="instagram">
+                                            <label class="form-check-label" for="instagram">
+                                                <i class="fab fa-instagram"></i> Instagram
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="twitter">
+                                            <label class="form-check-label" for="twitter">
+                                                <i class="fab fa-twitter"></i> Twitter
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="facebook">
+                                            <label class="form-check-label" for="facebook">
+                                                <i class="fab fa-facebook"></i> Facebook
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="linkedin">
+                                            <label class="form-check-label" for="linkedin">
+                                                <i class="fab fa-linkedin"></i> LinkedIn
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary">
+                                Save & Generate
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Analytics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Analytics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="analytics-card p-3">
+                                    <h6 class="mb-2">Total Views</h6>
+                                    <h3 class="mb-0">1,234</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="analytics-card p-3">
+                                    <h6 class="mb-2">Total Clicks</h6>
+                                    <h3 class="mb-0">567</h3>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="analytics-card p-3">
+                                    <h6 class="mb-2">CTR</h6>
+                                    <h3 class="mb-0">45.9%</h3>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4">
+                            <canvas id="analyticsChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Preview -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Preview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="preview-frame">
+                            <div class="preview-content" id="previewContent">
+                                <!-- Preview content will be added here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Share & Export -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Share & Export</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- QR Code -->
+                        <div class="text-center mb-4">
+                            <div class="qr-code" id="qrCode"></div>
+                            <button class="btn btn-outline-primary mt-2" onclick="downloadQR()">
+                                <i class="fas fa-download"></i> Download QR Code
+                            </button>
+                        </div>
+
+                        <!-- Share URL -->
+                        <div class="mb-4">
+                            <label class="form-label">Share URL</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="shareUrl" readonly>
+                                <button class="btn btn-outline-primary" onclick="copyShareUrl()">
+                                    <i class="fas fa-copy"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Export Options -->
+                        <div>
+                            <button class="btn btn-outline-primary w-100 mb-2" onclick="exportHTML()">
+                                <i class="fas fa-code"></i> Export as HTML
+                            </button>
+                            <button class="btn btn-outline-primary w-100" onclick="exportJSON()">
+                                <i class="fas fa-file-code"></i> Export as JSON
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white text-center py-3">
+        <p>Created by Aqib Chaudhary | Multi-Tools Website</p>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="../../js/link-tree.js"></script>
+</body>
+</html> 

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Cropper - Multi-Tools</title>
+    <meta name="description" content="Crop and edit images online. Precise selection tools, aspect ratio presets, and rotation options. Free online image cropper.">
+    <meta name="keywords" content="image cropper, photo editor, crop tool, image editing">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .image-container {
+            max-height: 500px;
+            margin-bottom: 1rem;
+        }
+        #cropPreview {
+            display: block;
+            max-width: 100%;
+            max-height: 500px;
+        }
+        .cropper-container {
+            margin: 0 auto;
+        }
+        .aspect-ratio-button {
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .preview-box {
+            width: 150px;
+            height: 150px;
+            border: 1px solid #dee2e6;
+            overflow: hidden;
+            margin: 0 auto;
+        }
+        .preview-box img {
+            max-width: 100%;
+        }
+        .controls-section {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 0.25rem;
+            margin-bottom: 1rem;
+        }
+        .rotate-button {
+            margin-right: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header will be loaded dynamically -->
+    <div id="header-placeholder"></div>
+
+    <!-- Main Content -->
+    <main class="container py-5">
+        <h1 class="text-center mb-4">Image Cropper</h1>
+        <div class="row">
+            <!-- Tool Interface -->
+            <div class="col-lg-10 mx-auto">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <!-- File Upload Area -->
+                        <div class="mb-4 text-center" id="uploadArea">
+                            <input type="file" id="imageInput" accept="image/*" class="d-none">
+                            <button class="btn btn-primary" onclick="document.getElementById('imageInput').click()">
+                                <i class="bi bi-upload"></i> Upload Image
+                            </button>
+                            <p class="text-muted small mt-2">Supports JPG, PNG, WebP (Max 10MB)</p>
+                        </div>
+
+                        <!-- Cropper Area -->
+                        <div class="d-none" id="cropperArea">
+                            <!-- Image Container -->
+                            <div class="image-container mb-4">
+                                <img id="cropPreview" src="" alt="Preview">
+                            </div>
+
+                            <!-- Controls -->
+                            <div class="controls-section mb-4">
+                                <div class="row">
+                                    <!-- Aspect Ratio Controls -->
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="mb-2">Aspect Ratio</h6>
+                                        <button class="btn btn-outline-secondary aspect-ratio-button" data-ratio="NaN">Free</button>
+                                        <button class="btn btn-outline-secondary aspect-ratio-button" data-ratio="1">1:1</button>
+                                        <button class="btn btn-outline-secondary aspect-ratio-button" data-ratio="1.7778">16:9</button>
+                                        <button class="btn btn-outline-secondary aspect-ratio-button" data-ratio="0.5625">9:16</button>
+                                        <button class="btn btn-outline-secondary aspect-ratio-button" data-ratio="1.3333">4:3</button>
+                                        <button class="btn btn-outline-secondary aspect-ratio-button" data-ratio="0.75">3:4</button>
+                                    </div>
+
+                                    <!-- Rotation Controls -->
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="mb-2">Rotation & Flip</h6>
+                                        <button class="btn btn-outline-secondary rotate-button" onclick="rotateLeft()">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Rotate Left
+                                        </button>
+                                        <button class="btn btn-outline-secondary rotate-button" onclick="rotateRight()">
+                                            <i class="bi bi-arrow-clockwise"></i> Rotate Right
+                                        </button>
+                                        <button class="btn btn-outline-secondary rotate-button" onclick="flipHorizontal()">
+                                            <i class="bi bi-arrow-left-right"></i> Flip H
+                                        </button>
+                                        <button class="btn btn-outline-secondary rotate-button" onclick="flipVertical()">
+                                            <i class="bi bi-arrow-down-up"></i> Flip V
+                                        </button>
+                                    </div>
+
+                                    <!-- Zoom Controls -->
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="mb-2">Zoom</h6>
+                                        <button class="btn btn-outline-secondary me-2" onclick="zoomIn()">
+                                            <i class="bi bi-zoom-in"></i> Zoom In
+                                        </button>
+                                        <button class="btn btn-outline-secondary" onclick="zoomOut()">
+                                            <i class="bi bi-zoom-out"></i> Zoom Out
+                                        </button>
+                                    </div>
+
+                                    <!-- Reset & Download -->
+                                    <div class="col-md-6 mb-3">
+                                        <h6 class="mb-2">Actions</h6>
+                                        <button class="btn btn-outline-secondary me-2" onclick="resetCropper()">
+                                            <i class="bi bi-arrow-counterclockwise"></i> Reset
+                                        </button>
+                                        <button class="btn btn-primary" onclick="cropImage()">
+                                            <i class="bi bi-crop"></i> Crop & Download
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Live Preview -->
+                            <div class="text-center mb-4">
+                                <h6>Live Preview</h6>
+                                <div class="preview-box">
+                                    <div class="preview"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Tips for Better Results</h5>
+                        <ul class="list-unstyled mb-0">
+                            <li><i class="bi bi-check-circle text-success"></i> Use aspect ratio presets for common formats</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Drag the corners to resize the crop area</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Double-click to toggle aspect ratio lock</li>
+                            <li><i class="bi bi-check-circle text-success"></i> Use zoom controls for precise cropping</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be loaded dynamically -->
+    <div id="footer-placeholder"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.12/cropper.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script>
+        let cropper;
+        const maxFileSize = 10 * 1024 * 1024; // 10MB
+        const supportedFormats = ['image/jpeg', 'image/png', 'image/webp'];
+
+        // DOM Elements
+        const imageInput = document.getElementById('imageInput');
+        const cropPreview = document.getElementById('cropPreview');
+        const uploadArea = document.getElementById('uploadArea');
+        const cropperArea = document.getElementById('cropperArea');
+
+        // Setup event listeners
+        imageInput.addEventListener('change', handleImageUpload);
+        document.querySelectorAll('.aspect-ratio-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const ratio = parseFloat(button.dataset.ratio);
+                cropper.setAspectRatio(ratio);
+                
+                // Update active state
+                document.querySelectorAll('.aspect-ratio-button').forEach(btn => 
+                    btn.classList.remove('active', 'btn-primary', 'text-white'));
+                button.classList.add('active', 'btn-primary', 'text-white');
+            });
+        });
+
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
+            
+            if (!file) return;
+
+            if (file.size > maxFileSize) {
+                alert('File is too large. Maximum size is 10MB.');
+                return;
+            }
+
+            if (!supportedFormats.includes(file.type)) {
+                alert('Unsupported file format. Please use JPG, PNG, or WebP.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                cropPreview.src = e.target.result;
+                uploadArea.classList.add('d-none');
+                cropperArea.classList.remove('d-none');
+                
+                if (cropper) {
+                    cropper.destroy();
+                }
+
+                cropper = new Cropper(cropPreview, {
+                    aspectRatio: NaN,
+                    viewMode: 2,
+                    preview: '.preview',
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    background: false,
+                    autoCrop: true,
+                    autoCropArea: 0.8,
+                    responsive: true,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: true,
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function rotateLeft() {
+            cropper.rotate(-90);
+        }
+
+        function rotateRight() {
+            cropper.rotate(90);
+        }
+
+        function flipHorizontal() {
+            cropper.scaleX(cropper.getData().scaleX * -1);
+        }
+
+        function flipVertical() {
+            cropper.scaleY(cropper.getData().scaleY * -1);
+        }
+
+        function zoomIn() {
+            cropper.zoom(0.1);
+        }
+
+        function zoomOut() {
+            cropper.zoom(-0.1);
+        }
+
+        function resetCropper() {
+            cropper.reset();
+            document.querySelectorAll('.aspect-ratio-button').forEach(btn => 
+                btn.classList.remove('active', 'btn-primary', 'text-white'));
+        }
+
+        function cropImage() {
+            const canvas = cropper.getCroppedCanvas({
+                maxWidth: 4096,
+                maxHeight: 4096,
+                fillColor: '#fff',
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+
+            if (!canvas) {
+                alert('Error cropping image. Please try again.');
+                return;
+            }
+
+            canvas.toBlob((blob) => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = 'cropped-image.png';
+                link.href = url;
+                link.click();
+                URL.revokeObjectURL(url);
+            }, 'image/png', 1.0);
+        }
+    </script>
+</body>
+</html> 

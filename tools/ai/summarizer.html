@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Text Summarizer - Smart Content Summarization | Multi Tools</title>
+    <meta name="description" content="Automatically summarize any text, article, or document using AI. Get concise, accurate summaries while preserving key information.">
+    <meta name="keywords" content="AI summarizer, text summary, article summarizer, document summarizer, content summary">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../css/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <style>
+        .summary-stats {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+        }
+        #inputText, #outputText {
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255,255,255,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-content {
+            text-align: center;
+            background: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation will be included via JavaScript -->
+    <div id="nav-placeholder"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 class="mb-2">Summarizing Text</h5>
+            <p class="mb-0 text-muted" id="loadingStatus">Analyzing content...</p>
+        </div>
+    </div>
+
+    <main class="container my-4">
+        <h1 class="text-center mb-4">AI Text Summarizer</h1>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <form id="summarizerForm">
+                            <div class="mb-3">
+                                <label for="inputText" class="form-label">Input Text</label>
+                                <textarea class="form-control" id="inputText" rows="8" 
+                                          placeholder="Paste your text here (minimum 100 characters)" required></textarea>
+                                <div class="d-flex justify-content-between mt-2">
+                                    <small class="text-muted" id="inputStats">0 characters | 0 words</small>
+                                    <button type="button" class="btn btn-link btn-sm p-0" onclick="clearInput()">
+                                        Clear
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label for="summaryLength" class="form-label">Summary Length</label>
+                                    <select class="form-select" id="summaryLength">
+                                        <option value="very-short">Very Short (10%)</option>
+                                        <option value="short">Short (25%)</option>
+                                        <option value="medium" selected>Medium (40%)</option>
+                                        <option value="long">Long (60%)</option>
+                                        <option value="custom">Custom Length</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="summaryStyle" class="form-label">Summary Style</label>
+                                    <select class="form-select" id="summaryStyle">
+                                        <option value="paragraph">Paragraph</option>
+                                        <option value="bullets">Bullet Points</option>
+                                        <option value="outline">Outline</option>
+                                        <option value="highlights">Key Highlights</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <a class="btn btn-link p-0" data-bs-toggle="collapse" href="#advancedOptions">
+                                    <i class="bi bi-gear"></i> Advanced Options
+                                </a>
+                                <div class="collapse mt-3" id="advancedOptions">
+                                    <div class="card card-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="language" class="form-label">Output Language</label>
+                                                    <select class="form-select" id="language">
+                                                        <option value="en">English</option>
+                                                        <option value="es">Spanish</option>
+                                                        <option value="fr">French</option>
+                                                        <option value="de">German</option>
+                                                        <option value="it">Italian</option>
+                                                        <option value="pt">Portuguese</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="tone" class="form-label">Tone</label>
+                                                    <select class="form-select" id="tone">
+                                                        <option value="neutral">Neutral</option>
+                                                        <option value="formal">Formal</option>
+                                                        <option value="casual">Casual</option>
+                                                        <option value="professional">Professional</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="keepKeywords" checked>
+                                            <label class="form-check-label" for="keepKeywords">
+                                                Preserve key terms and phrases
+                                            </label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="includeSources">
+                                            <label class="form-check-label" for="includeSources">
+                                                Include source citations
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-magic"></i> Generate Summary
+                                </button>
+                            </div>
+                        </form>
+
+                        <div id="result" class="mt-4" style="display: none;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <h5 class="mb-0">Summary</h5>
+                                <span class="summary-stats" id="summaryStats">
+                                    Reduction: 0% | 0 words
+                                </span>
+                            </div>
+                            <div class="border rounded p-3 bg-light">
+                                <div id="outputText" class="mb-3"></div>
+                                <div class="btn-group">
+                                    <button class="btn btn-outline-primary" onclick="regenerateSummary()">
+                                        <i class="bi bi-arrow-clockwise"></i> Regenerate
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="copyToClipboard()">
+                                        <i class="bi bi-clipboard"></i> Copy
+                                    </button>
+                                    <button class="btn btn-outline-primary" onclick="downloadText()">
+                                        <i class="bi bi-download"></i> Download
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tips Section -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Tips for Better Results</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="bi bi-check-circle text-success"></i> Use clear, well-structured text</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Include complete sentences</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Choose appropriate summary length</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled mb-0">
+                                    <li><i class="bi bi-check-circle text-success"></i> Select suitable summary style</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Use advanced options for precision</li>
+                                    <li><i class="bi bi-check-circle text-success"></i> Review and edit the summary</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Related Tools -->
+                <div class="card shadow-sm">
+                    <div class="card-header">
+                        <h5 class="mb-0">Related Tools</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-6">
+                                <a href="text-generator.html" class="text-decoration-none">
+                                    <i class="bi bi-pencil-square"></i> Text Generator
+                                </a>
+                            </div>
+                            <div class="col-6">
+                                <a href="paraphraser.html" class="text-decoration-none">
+                                    <i class="bi bi-arrow-repeat"></i> Paraphrasing Tool
+                                </a>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <a href="../text/grammar-checker.html" class="text-decoration-none">
+                                    <i class="bi bi-check-square"></i> Grammar Checker
+                                </a>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <a href="translator.html" class="text-decoration-none">
+                                    <i class="bi bi-translate"></i> AI Translator
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer will be included via JavaScript -->
+    <div id="footer-placeholder"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="../../js/common.js"></script>
+    <script>
+        // Update input stats
+        function updateInputStats() {
+            const text = document.getElementById('inputText').value;
+            const chars = text.length;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0).length;
+            document.getElementById('inputStats').textContent = 
+                `${chars} characters | ${words} words`;
+        }
+
+        // Clear input
+        function clearInput() {
+            document.getElementById('inputText').value = '';
+            updateInputStats();
+            document.getElementById('result').style.display = 'none';
+        }
+
+        // Generate summary
+        document.getElementById('summarizerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const text = document.getElementById('inputText').value;
+            if (text.length < 100) {
+                alert('Please enter at least 100 characters.');
+                return;
+            }
+
+            const formData = {
+                text: text,
+                length: document.getElementById('summaryLength').value,
+                style: document.getElementById('summaryStyle').value,
+                language: document.getElementById('language').value,
+                tone: document.getElementById('tone').value,
+                keepKeywords: document.getElementById('keepKeywords').checked,
+                includeSources: document.getElementById('includeSources').checked
+            };
+
+            // Show loading overlay
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            loadingOverlay.style.display = 'flex';
+            
+            try {
+                // Simulate AI summarization with different loading states
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                document.getElementById('loadingStatus').textContent = 'Analyzing key points...';
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                document.getElementById('loadingStatus').textContent = 'Generating summary...';
+                await new Promise(resolve => setTimeout(resolve, 1000));
+
+                // Sample summary (replace with actual AI-generated summary)
+                const originalWords = text.trim().split(/\s+/).length;
+                const summaryText = `This is a sample summary of your text. The actual AI-generated summary would be more relevant and concise.\n\n` +
+                                  `The summary would maintain key points while reducing the length according to your specifications.`;
+                const summaryWords = summaryText.trim().split(/\s+/).length;
+                const reduction = Math.round((1 - summaryWords/originalWords) * 100);
+
+                // Show result
+                document.getElementById('result').style.display = 'block';
+                document.getElementById('outputText').innerHTML = summaryText;
+                document.getElementById('summaryStats').textContent = 
+                    `Reduction: ${reduction}% | ${summaryWords} words`;
+                
+                // Scroll to result
+                document.getElementById('result').scrollIntoView({ behavior: 'smooth' });
+            } catch (error) {
+                alert('Error generating summary. Please try again.');
+            } finally {
+                loadingOverlay.style.display = 'none';
+            }
+        });
+
+        // Regenerate summary
+        function regenerateSummary() {
+            document.getElementById('summarizerForm').dispatchEvent(new Event('submit'));
+        }
+
+        // Copy to clipboard
+        async function copyToClipboard() {
+            const text = document.getElementById('outputText').innerText;
+            try {
+                await navigator.clipboard.writeText(text);
+                showToast('Summary copied to clipboard!');
+            } catch (error) {
+                alert('Failed to copy summary');
+            }
+        }
+
+        // Download text
+        function downloadText() {
+            const text = document.getElementById('outputText').innerText;
+            const blob = new Blob([text], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'summary.txt';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+
+        // Show toast message
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.className = 'toast align-items-center text-white bg-success border-0 position-fixed bottom-0 end-0 m-3';
+            toast.setAttribute('role', 'alert');
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">${message}</div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                </div>
+            `;
+            document.body.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast);
+            bsToast.show();
+            toast.addEventListener('hidden.bs.toast', () => toast.remove());
+        }
+
+        // Initialize
+        document.getElementById('inputText').addEventListener('input', updateInputStats);
+    </script>
+</body>
+</html> 
